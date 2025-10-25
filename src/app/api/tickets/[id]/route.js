@@ -1,4 +1,3 @@
-// src/app/api/tickets/[id]/route.js
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
@@ -6,14 +5,13 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// FUNÇÃO GET (Já correta)
+// FUNÇÃO GET
 export async function GET(req, { params }) {
     const session = await getServerSession(authOptions);
     if (!session) {
         return NextResponse.json({ message: 'Não autorizado' }, { status: 401 });
     }
   try {
-    // Sanitize and ensure params.id is a string
     const id = String(params?.id ?? '');
     console.debug('[ticket GET] params.id=', params, 'resolved id=', id, 'session.user.id=', session?.user?.id);
 
@@ -38,7 +36,7 @@ export async function GET(req, { params }) {
   }
 }
 
-// FUNÇÃO PATCH (Já correta)
+// FUNÇÃO PATCH 
 export async function PATCH(req, { params }) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== 'AGENT') {
@@ -64,27 +62,23 @@ export async function PATCH(req, { params }) {
   }
 }
 
-// --- FUNÇÃO DELETE CORRIGIDA ---
-// 1. Garantimos que o segundo argumento é { params }
+
+
 export async function DELETE(req, { params }) {
   const session = await getServerSession(authOptions);
-  // Apenas AGENTES podem deletar
   if (!session || session.user.role !== 'AGENT') {
     return NextResponse.json({ message: 'Não autorizado' }, { status: 403 });
   }
 
   try {
-    // Usar o Prisma para deletar o ticket pelo ID (params.id funciona aqui)
     await prisma.ticket.delete({
       where: { id: params.id },
     });
 
-    // 2. CORREÇÃO: Usar a Response padrão para 204 No Content
     return new Response(null, { status: 204 });
 
   } catch (error) {
     console.error("Erro ao deletar o ticket:", error);
-    // Verifica se o erro foi porque o ticket não foi encontrado
     if (error.code === 'P2025') {
          return NextResponse.json({ message: 'Ticket não encontrado para exclusão' }, { status: 404 });
      }

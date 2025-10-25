@@ -17,7 +17,7 @@ model User {
   emailVerified DateTime?
   role      Role     @default(CLIENT)
 
-  tickets   Ticket[]  // Um usuário pode ter vários tickets
+  tickets   Ticket[]
   accounts  Account[]
   sessions  Session[]
 }
@@ -27,7 +27,7 @@ model Ticket {
   id          String   @id @default(cuid())
   title       String
   description String
-  status      Status   @default(OPEN) // Status: Aberto, Em Progresso, Fechado
+  status      Status   @default(OPEN)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

@@ -8,9 +8,8 @@ export default function NewTicketPage() {
   const router = useRouter();
 
   const handleTicketCreated = () => {
-    // Após criar o ticket, redireciona o usuário de volta para o dashboard principal
     router.push('/dashboard');
-    router.refresh(); // Força a atualização dos dados na página de dashboard
+    router.refresh();
   };
 
   return (

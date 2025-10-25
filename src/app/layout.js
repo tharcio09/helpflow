@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "HelpFlow",
-  description: "Sistema de HelpDesk",
+  title: "HelpFlow - Sistema de HelpDesk",
+  description: "Gerencie seus chamados de suporte de forma eficiente.",
 };
 
 export default function RootLayout({ children }) {

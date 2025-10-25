@@ -8,7 +8,6 @@ import AuthButtons from './components/AuthButtons';
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
 
-  // Se o usuário já estiver logado, redireciona direto para o dashboard
   if (session) {
     redirect('/dashboard');
   }

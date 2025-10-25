@@ -1,4 +1,3 @@
-// src/app/components/UserProfile.jsx
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
@@ -7,12 +6,10 @@ import { LuLogOut } from 'react-icons/lu';
 export default function UserProfile() {
   const { data: session } = useSession();
 
-  // Se não houver sessão (ex: na página de login), não mostra nada
   if (!session) return null; 
 
   return (
     <div>
-      {/* Informações do Usuário */}
       <div className="flex items-center gap-3 mb-4">
         <img 
           src={session.user.image} 
@@ -24,10 +21,8 @@ export default function UserProfile() {
           <p className="text-xs text-gray-400">{session.user.email}</p>
         </div>
       </div>
-
-      {/* Botão de Sair */}
       <button 
-        onClick={() => signOut({ callbackUrl: '/' })} // Ao sair, redireciona para a home (página de login)
+        onClick={() => signOut({ callbackUrl: '/' })}
         className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-sm text-red-400 hover:bg-red-900/50 transition-colors"
       >
         <LuLogOut />

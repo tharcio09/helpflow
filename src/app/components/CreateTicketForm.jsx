@@ -1,9 +1,7 @@
-// src/app/components/CreateTicketForm.jsx
 'use client';
 
 import { useState } from 'react';
 
-// 1. O COMPONENTE AGORA RECEBE A FUNÇÃO 'onTicketCreated' COMO PROP.
 export default function CreateTicketForm({ onTicketCreated }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -24,7 +22,6 @@ export default function CreateTicketForm({ onTicketCreated }) {
       setTitle('');
       setDescription('');
       
-      // 2. A MÁGICA ACONTECE AQUI! CHAMAMOS A FUNÇÃO DO PAI PARA ATUALIZAR A LISTA.
       if (onTicketCreated) {
         onTicketCreated();
       }

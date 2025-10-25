@@ -2,6 +2,15 @@
 
 import Link from 'next/link';
 
+const getStatusDisplayNamePT = (status) => {
+  switch (status) {
+    case 'OPEN': return 'Aberto';
+    case 'IN_PROGRESS': return 'Em Progresso';
+    case 'CLOSED': return 'Fechado';
+    default: return status;
+  }
+};
+
 export default function TicketList({ tickets, loading, error }) {
 
   if (loading) {
@@ -24,11 +33,12 @@ export default function TicketList({ tickets, loading, error }) {
               <div key={ticket.id} className="p-4 bg-gray-800 rounded-lg shadow-md border-l-4 border-indigo-500">
                 <div className="flex justify-between items-center">
                   <h3 className="text-xl font-semibold text-white">{ticket.title}</h3>
-                  <span className={`px-3 py-1 text-xs font-bold rounded-full ${ticket.status === 'OPEN' ? 'bg-green-600 text-white' :
-                      ticket.status === 'IN_PROGRESS' ? 'bg-yellow-500 text-black' :
-                        'bg-gray-600 text-gray-300'
-                    }`}>
-                    {ticket.status}
+                  <span className={`px-3 py-1 text-xs font-bold rounded-full ${
+                    ticket.status === 'OPEN' ? 'bg-green-600 text-white' :
+                    ticket.status === 'IN_PROGRESS' ? 'bg-yellow-500 text-black' :
+                    'bg-gray-600 text-gray-300'
+                  }`}>
+                    {getStatusDisplayNamePT(ticket.status)}
                   </span>
                 </div>
                 <p className="mt-2 text-gray-400">{ticket.description}</p>
