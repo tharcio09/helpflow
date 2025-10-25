@@ -54,13 +54,6 @@ O sistema implementa uma lógica de autorização baseada em dois papéis:
 
 ---
 
-## 📸 Screenshot
-
-
-
-![Screenshot do HelpFlow](public/screenshot.PNG)
-
----
 
 ## 🚀 Como Rodar Localmente
 
