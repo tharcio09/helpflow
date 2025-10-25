@@ -7,7 +7,7 @@ O HelpFlow é uma aplicação web Full-Stack robusta de sistema de HelpDesk (cha
 
 Este projeto demonstra habilidades sólidas em desenvolvimento Full-Stack, gerenciamento de banco de dados, autenticação e autorização baseada em papéis.
 
-**[➡️ Acesse a versão ao vivo aqui!](https://seu-link-do-vercel.com)** *(Substitua este link após o deploy)*
+**[➡️ Acesse a versão ao vivo aqui!](https://helpflow.vercel.app/)** 
 
 ---
 
