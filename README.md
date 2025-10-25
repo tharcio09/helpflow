@@ -1,6 +1,6 @@
 # 🚀 HelpFlow: Sistema de HelpDesk Completo
 
-![Screenshot da Página de Detalhes de um Ticket no HelpFlow](./public/screenshot.png) 
+![Screenshot da Página de Detalhes de um Ticket no HelpFlow](/public/screenshot.PNG) 
 ## 🌟 Visão Geral
 
 O HelpFlow é uma aplicação web Full-Stack robusta de sistema de HelpDesk (chamados), projetada para simplificar a comunicação e o gerenciamento de solicitações entre clientes e equipes de suporte (agentes). Desenvolvido com tecnologias modernas, o HelpFlow oferece uma solução eficiente e segura para o acompanhamento de problemas e tarefas.
@@ -58,7 +58,7 @@ O sistema implementa uma lógica de autorização baseada em dois papéis:
 
 
 
-![Screenshot do HelpFlow](./public/screenshot.png)
+![Screenshot do HelpFlow](/public/screenshot.PNG)
 
 ---
 
