@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import TicketList from "../../components/TicketList";
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession(); // Pegamos o 'status' aqui
+  const { data: session, status } = useSession();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

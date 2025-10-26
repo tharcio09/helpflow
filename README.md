@@ -1,13 +1,13 @@
 # 🚀 HelpFlow: Sistema de HelpDesk Completo
 
-![Screenshot da Página de Detalhes de um Ticket no HelpFlow](/public/screenshot.PNG) 
+![Screenshot da Página de Detalhes de um Ticket no HelpFlow](public/screenshot.PNG) 
 ## 🌟 Visão Geral
 
 O HelpFlow é uma aplicação web Full-Stack robusta de sistema de HelpDesk (chamados), projetada para simplificar a comunicação e o gerenciamento de solicitações entre clientes e equipes de suporte (agentes). Desenvolvido com tecnologias modernas, o HelpFlow oferece uma solução eficiente e segura para o acompanhamento de problemas e tarefas.
 
 Este projeto demonstra habilidades sólidas em desenvolvimento Full-Stack, gerenciamento de banco de dados, autenticação e autorização baseada em papéis.
 
-**[➡️ Acesse a versão ao vivo aqui!](https://seu-link-do-vercel.com)** *(Substitua este link após o deploy)*
+**[➡️ Acesse a versão ao vivo aqui!](https://helpflow.vercel.app/)** 
 
 ---
 
@@ -54,13 +54,6 @@ O sistema implementa uma lógica de autorização baseada em dois papéis:
 
 ---
 
-## 📸 Screenshot
-
-
-
-![Screenshot do HelpFlow](/public/screenshot.PNG)
-
----
 
 ## 🚀 Como Rodar Localmente
 

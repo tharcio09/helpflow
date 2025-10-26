@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 
-// Função auxiliar para traduzir o status
 const getStatusDisplayNamePT = (status) => {
     switch (status) {
         case 'OPEN': return 'Aberto';
@@ -28,16 +27,11 @@ export default function TicketList({ tickets, loading, error }) {
             {tickets.length === 0 ? (
                 <p className="text-center text-gray-500">Nenhum ticket encontrado.</p>
             ) : (
-                // A div pai agora não precisa de classes de espaçamento
                 <div>
-                    {/* Usamos 'index' para saber qual item estamos renderizando */}
                     {tickets.map((ticket, index) => (
                         <Link
                             key={ticket.id}
                             href={`/ticket/${ticket.id}`}
-                            // --- A SOLUÇÃO APLICADA AQUI ---
-                            // Adiciona 'mt-6' (margem superior) se não for o primeiro item (index > 0)
-                            // Adiciona 'block' para garantir que a margem funcione corretamente em elementos <a>
                             className={`block ${index > 0 ? 'mt-6' : ''}`}
                         >
                             <div className="p-4 bg-gray-800 rounded-lg shadow-md border-l-4 border-indigo-500 hover:bg-gray-700 transition-colors cursor-pointer">
@@ -53,7 +47,6 @@ export default function TicketList({ tickets, loading, error }) {
                                 </div>
                                 <p className="mt-2 text-gray-400">{ticket.description}</p>
                                 <p className="mt-3 text-xs text-gray-500">
-                                    {/* Usamos optional chaining (?.) para segurança caso author não exista */}
                                     Criado por: {ticket.author?.name || 'Desconhecido'} em {new Date(ticket.createdAt).toLocaleDateString()}
                                 </p>
                             </div>
