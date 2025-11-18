@@ -16,13 +16,13 @@ export async function POST(req) {
     const body = await req.json();
     const { title, description } = body;
 
-    const userId = session.user.id;
+    const agentId = session.user.id;
 
     const newTicket = await prisma.ticket.create({
       data: {
         title,
         description,
-        userId,
+        agentId,
       },
     });
 
@@ -48,22 +48,14 @@ export async function GET(req) {
   }
 
   try {
-    if (session.user.role === "AGENT") {
-      const tickets = await prisma.ticket.findMany({
-        include: { author: true },
-        orderBy: { createdAt: "desc" },
-      });
-      return NextResponse.json(tickets, { status: 200 });
-    } else {
-      const tickets = await prisma.ticket.findMany({
-        where: {
-          userId: session.user.id,
-        },
-        include: { author: true },
-        orderBy: { createdAt: "desc" },
-      });
-      return NextResponse.json(tickets, { status: 200 });
-    }
+    const tickets = await prisma.ticket.findMany({
+      where: {
+        agentId: session.user.id,
+      },
+      include: { agent: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(tickets, { status: 200 });
   } catch (error) {
     console.error("Erro ao buscar os tickets:", error);
     return NextResponse.json(

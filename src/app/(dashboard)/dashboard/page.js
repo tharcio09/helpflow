@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -26,17 +25,46 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     if (status === 'authenticated') {
       fetchTickets();
     }
   }, [status]);
 
+  const handleTicketDeleted = (deletedTicketId) => {
+    setTickets(prev => prev.filter(ticket => ticket.id !== deletedTicketId));
+  };
+
+  const handleTicketUpdated = (updatedTicket) => {
+    setTickets(prev =>
+      prev.map(ticket =>
+        ticket.id === updatedTicket.id ? updatedTicket : ticket
+      )
+    );
+  };
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Olá, {session?.user?.name}!</h1>
-      <p className="text-gray-400 mb-8">Aqui estão os seus tickets. Papel: {session?.user?.role}</p>
-      <TicketList tickets={tickets} loading={loading} error={error} />
+    <div className="max-w-4xl mx-auto p-6 bg-gray-900 min-h-screen rounded-xl shadow-lg border border-gray-800">
+
+      <h1 className="text-4xl font-bold mb-2 text-white">
+        Olá, {session?.user?.name} 👋
+      </h1>
+      <p className="text-gray-400 mb-8 text-lg">
+        Aqui estão seus tickets — <span className="font-medium text-indigo-400">{session?.user?.role}</span>
+      </p>
+
+      <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-md">
+        <TicketList
+          tickets={tickets}
+          loading={loading}
+          error={error}
+          onTicketDeleted={handleTicketDeleted}
+          onTicketUpdated={handleTicketUpdated}
+          session={session}
+        />
+      </div>
+      
     </div>
   );
 }

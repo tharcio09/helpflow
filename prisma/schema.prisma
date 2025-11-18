@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,7 +16,7 @@ model User {
   email     String?  @unique
   image     String?
   emailVerified DateTime?
-  role      Role     @default(CLIENT)
+  role      Role     @default(AGENT)
 
   tickets   Ticket[]
   accounts  Account[]
@@ -33,13 +32,12 @@ model Ticket {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  userId    String // Chave para conectar o Ticket ao User
-  author    User   @relation(fields: [userId], references: [id])
+  agentId    String // Chave para conectar o Ticket ao User
+  agent    User   @relation(fields: [agentId], references: [id])
 }
 
 // Tipos pré-definidos para os papéis e status
 enum Role {
-  CLIENT
   AGENT
 }
 

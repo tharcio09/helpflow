@@ -1,59 +1,190 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import Link from "next/link";
+import { useState } from "react";
 
 const getStatusDisplayNamePT = (status) => {
-    switch (status) {
-        case 'OPEN': return 'Aberto';
-        case 'IN_PROGRESS': return 'Em Progresso';
-        case 'CLOSED': return 'Fechado';
-        default: return status;
-    }
+  switch (status) {
+    case "OPEN":
+      return "Aberto";
+    case "IN_PROGRESS":
+      return "Em Progresso";
+    case "CLOSED":
+      return "Fechado";
+    default:
+      return status;
+  }
 };
 
-export default function TicketList({ tickets, loading, error }) {
+export default function TicketList({
+  tickets,
+  loading,
+  error,
+  onTicketDeleted,
+  onTicketUpdated,
+  session,
+}) {
+  const [deletingId, setDeletingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
 
-    if (loading) {
-        return <p className="text-center text-gray-400 mt-12">Carregando tickets...</p>;
+  // ======================= DELETE =========================
+  const handleDelete = async (ticketId) => {
+    if (window.confirm("Tem certeza que deseja excluir este ticket?")) {
+      setDeletingId(ticketId);
+      try {
+        const res = await fetch(`/api/tickets/${ticketId}`, {
+          method: "DELETE",
+        });
+
+        if (!res.ok) {
+          throw new Error("Falha ao excluir o ticket.");
+        }
+
+        onTicketDeleted?.(ticketId);
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        setDeletingId(null);
+      }
     }
+  };
 
-    if (error) {
-        return <p className="text-center text-red-500 mt-12">{error}</p>;
+  // ======================= UPDATE STATUS =========================
+  const handleStatusChange = async (ticketId, newStatus) => {
+    setUpdatingId(ticketId);
+
+    try {
+      const res = await fetch(`/api/tickets/${ticketId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok) throw new Error("Falha ao atualizar o status.");
+
+      const updatedTicket = await res.json();
+      onTicketUpdated?.(updatedTicket);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setUpdatingId(null);
     }
+  };
 
+  // ======================= LOADING / ERROR =========================
+  if (loading) {
     return (
-        <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6 text-white text-center">Meus Tickets</h2>
-            {tickets.length === 0 ? (
-                <p className="text-center text-gray-500">Nenhum ticket encontrado.</p>
-            ) : (
-                <div>
-                    {tickets.map((ticket, index) => (
-                        <Link
-                            key={ticket.id}
-                            href={`/ticket/${ticket.id}`}
-                            className={`block ${index > 0 ? 'mt-6' : ''}`}
-                        >
-                            <div className="p-4 bg-gray-800 rounded-lg shadow-md border-l-4 border-indigo-500 hover:bg-gray-700 transition-colors cursor-pointer">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="text-xl font-semibold text-white">{ticket.title}</h3>
-                                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${
-                                        ticket.status === 'OPEN' ? 'bg-green-600 text-white' :
-                                        ticket.status === 'IN_PROGRESS' ? 'bg-yellow-500 text-black' :
-                                        'bg-gray-600 text-gray-300'
-                                    }`}>
-                                        {getStatusDisplayNamePT(ticket.status)}
-                                    </span>
-                                </div>
-                                <p className="mt-2 text-gray-400">{ticket.description}</p>
-                                <p className="mt-3 text-xs text-gray-500">
-                                    Criado por: {ticket.author?.name || 'Desconhecido'} em {new Date(ticket.createdAt).toLocaleDateString()}
-                                </p>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
-            )}
-        </div>
+      <p className="text-center text-gray-400 mt-12">Carregando tickets...</p>
     );
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500 mt-12">{error}</p>;
+  }
+
+  // ======================= UI =========================
+  return (
+    <div className="mt-12">
+      <h2 className="text-2xl font-semibold mb-6 text-white text-center">
+        Meus Tickets
+      </h2>
+
+      {tickets.length === 0 ? (
+        <p className="text-center text-gray-500">Nenhum ticket encontrado.</p>
+      ) : (
+        <div>
+          {tickets.map((ticket) => (
+            <div key={ticket.id} className="mt-6">
+              <div className="p-5 bg-gray-800/40 border border-gray-700 rounded-xl hover:bg-gray-800/60 transition-colors">
+
+                {/* TÍTULO + STATUS */}
+                <div className="flex items-center justify-between mb-2">
+                  <Link
+                    href={`/ticket/${ticket.id}`}
+                    className="hover:underline"
+                  >
+                    <h3 className="text-lg font-medium text-white">
+                      {ticket.title}
+                    </h3>
+                  </Link>
+
+                  {/* BADGE MINIMALISTA */}
+                  <span
+                    className={`
+                      px-3 py-1 text-xs rounded-full font-medium
+                      ${
+                        ticket.status === "OPEN"
+                          ? "bg-green-700/40 text-green-300"
+                          : ticket.status === "IN_PROGRESS"
+                          ? "bg-yellow-600/30 text-yellow-300"
+                          : "bg-gray-600/40 text-gray-300"
+                      }
+                    `}
+                  >
+                    {getStatusDisplayNamePT(ticket.status)}
+                  </span>
+                </div>
+
+                {/* DESCRIÇÃO */}
+                <p className="text-sm text-gray-400 leading-relaxed">
+                  {ticket.description}
+                </p>
+
+                {/* AUTOR + DATA */}
+                <p className="mt-3 text-xs text-gray-500">
+                  Criado por{" "}
+                  <span className="text-gray-300 font-medium">
+                    {ticket.agent?.name ?? "Desconhecido"}
+                  </span>{" "}
+                  em{" "}
+                  <span className="text-gray-400">
+                    {new Date(ticket.createdAt).toLocaleDateString("pt-BR")}
+                  </span>
+                </p>
+
+                {/* CONTROLES (somente dono) */}
+                {session?.user?.id === ticket.agentId && (
+                  <div className="mt-4 flex flex-col gap-3">
+
+                    {/* SELECT STATUS (agora pequeno e minimalista) */}
+                    <select
+                      disabled={updatingId === ticket.id}
+                      value={ticket.status}
+                      onChange={(e) =>
+                        handleStatusChange(ticket.id, e.target.value)
+                      }
+                      className="bg-gray-700 text-white px-3 py-2 rounded-md text-sm border border-gray-600 w-40"
+                    >
+                      <option value="OPEN">Aberto</option>
+                      <option value="IN_PROGRESS">Em Progresso</option>
+                      <option value="CLOSED">Fechado</option>
+                    </select>
+
+                    {/* EDITAR + EXCLUIR */}
+                    <div className="flex gap-4 text-sm">
+                      <Link
+                        href={`/dashboard/ticket/${ticket.id}/edit`}
+                        className="text-blue-400 hover:text-blue-300"
+                      >
+                        Editar
+                      </Link>
+
+                      <button
+                        onClick={() => handleDelete(ticket.id)}
+                        disabled={deletingId === ticket.id}
+                        className="text-red-400 hover:text-red-300 disabled:opacity-50"
+                      >
+                        {deletingId === ticket.id ? "Excluindo..." : "Excluir"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

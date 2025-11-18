@@ -1,0 +1,53 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import EditTicketForm from '../../../../../components/EditTicketForm';
+
+export default function EditTicketPage() {
+    const { id } = useParams();
+    const router = useRouter();
+    const [ticket, setTicket] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (id) {
+            const fetchTicket = async () => {
+                try {
+                    setLoading(true);
+                    const res = await fetch(`/api/tickets/${id}`);
+                    if (!res.ok) {
+                        throw new Error('Falha ao buscar o ticket.');
+                    }
+                    const data = await res.json();
+                    setTicket(data);
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchTicket();
+        }
+    }, [id]);
+
+    const handleTicketUpdated = () => {
+        router.push('/dashboard');
+    };
+
+    if (loading) {
+        return <p className="text-center text-gray-400 mt-12">Carregando ticket...</p>;
+    }
+
+    if (error) {
+        return <p className="text-center text-red-500 mt-12">{error}</p>;
+    }
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold mb-6">Editar Ticket</h1>
+            {ticket && <EditTicketForm ticket={ticket} onTicketUpdated={handleTicketUpdated} />}
+        </div>
+    );
+}
