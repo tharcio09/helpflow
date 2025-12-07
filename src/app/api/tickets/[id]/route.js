@@ -43,7 +43,7 @@ export async function PATCH(req, { params }) {
     return NextResponse.json({ message: 'Não autorizado' }, { status: 403 });
   }
 
-  const { id } = params; // <-- CORRIGIDO (sem await)
+  const { id } = params;
 
   try {
     const body = await req.json();
@@ -137,7 +137,7 @@ export async function DELETE(req, { params }) {
     return NextResponse.json({ message: 'Não autorizado' }, { status: 403 });
   }
 
-  const { id } = await params;
+  const { id } = params;
 
   try {
     const ticket = await prisma.ticket.findUnique({
