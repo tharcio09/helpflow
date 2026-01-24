@@ -48,7 +48,6 @@ O sistema implementa uma lógica de autorização baseada em dois papéis:
 * **Autenticação:** [NextAuth.js](https://next-auth.js.org/) - Sistema completo de autenticação com provedores OAuth (GitHub).
 * **ORM:** [Prisma](https://www.prisma.io/) - Gerenciamento de banco de dados, modelagem e consultas.
 * **Banco de Dados:** [Supabase](https://supabase.com/) (PostgreSQL) - Backend como serviço (BaaS), com banco de dados gerenciado.
-* **Animações (Opcional):** [Framer Motion](https://www.framer.com/motion/) (se aplicável, adicione aqui)
 
 [![My Skills](https://skillicons.dev/icons?i=nextjs,react,tailwind,prisma,supabase)](https://skillicons.dev)
 
