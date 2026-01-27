@@ -1,40 +1,67 @@
-
 import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
-
-
-let prisma;
-if (process.env.NODE_ENV === "production") {
-  prisma = new PrismaClient();
-} else {
-  if (!global.prisma) global.prisma = new PrismaClient();
-  prisma = global.prisma;
-}
+import prisma from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export const authOptions = {
-  adapter: PrismaAdapter(prisma),
   providers: [
     GitHubProvider({
       clientId: process.env.AUTH_GITHUB_ID,
       clientSecret: process.env.AUTH_GITHUB_SECRET,
     }),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Invalid credentials");
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        });
+
+        // Check if user exists and uses credentials provider
+        if (!user) {
+          throw new Error("User not found");
+        }
+
+        // If user signed up with GitHub but trying to login with password, or vice versa if we were stricter
+        if (user.auth_provider && user.auth_provider !== "credentials") {
+          throw new Error(`User registered with ${user.auth_provider}`);
+        }
+
+        if (!user.password_hash) {
+          throw new Error("User has no password set");
+        }
+
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          user.password_hash
+        );
+
+        if (!isValid) {
+          throw new Error("Invalid password");
+        }
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          role: user.role,
+        };
+      },
+    }),
   ],
-  secret: process.env.NEXTAUTH_SECRET,
-  debug: true,
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   callbacks: {
-
-    async session({ session, user, token }) {
-      if (!session?.user) return session;
-      session.user.id = user?.id ?? token?.id ?? null;
-      session.user.role = user?.role ?? token?.role ?? null;
-      return session;
-    },
-
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -42,14 +69,20 @@ export const authOptions = {
       }
       return token;
     },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+      }
+      return session;
+    },
   },
   pages: {
-
-    signIn: "/auth/signin",
+    signIn: "/login",
   },
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
-
 
 export { handler as GET, handler as POST };
