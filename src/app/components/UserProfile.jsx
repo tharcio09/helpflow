@@ -6,14 +6,14 @@ import { LuLogOut } from 'react-icons/lu';
 export default function UserProfile() {
   const { data: session } = useSession();
 
-  if (!session) return null; 
+  if (!session) return null;
 
   return (
     <div>
       <div className="flex items-center gap-3 mb-4">
-        <img 
-          src={session.user.image} 
-          alt={session.user.name} 
+        <img
+          src={session.user.image || '/default-avatar.png'}
+          alt={session.user.name}
           className="w-10 h-10 rounded-full border-2 border-gray-600"
         />
         <div>
@@ -21,7 +21,7 @@ export default function UserProfile() {
           <p className="text-xs text-gray-400">{session.user.email}</p>
         </div>
       </div>
-      <button 
+      <button
         onClick={() => signOut({ callbackUrl: '/' })}
         className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-sm text-red-400 hover:bg-red-900/50 transition-colors"
       >

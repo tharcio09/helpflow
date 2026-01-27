@@ -10,13 +10,11 @@ export default function AuthButtons() {
     return (
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          {session.user.image && (
-            <img
-              src={session.user.image}
-              alt="Avatar"
-              className="h-8 w-8 rounded-full object-cover"
-            />
-          )}
+          <img
+            src={session.user.image || '/default-avatar.png'}
+            alt="Avatar"
+            className="h-8 w-8 rounded-full object-cover"
+          />
           <span className="text-sm text-gray-800">
             Olá, <span className="font-semibold">{session.user.name || session.user.email}</span>
           </span>
