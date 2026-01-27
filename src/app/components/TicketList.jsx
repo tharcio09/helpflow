@@ -85,12 +85,22 @@ export default function TicketList({
   // ======================= UI =========================
   return (
     <div className="mt-12">
-      <h2 className="text-2xl font-semibold mb-6 text-white text-center">
-        Meus Tickets
+      <h2 className="text-2xl font-semibold mb-6 text-white">
+        Meus tickets
       </h2>
 
       {tickets.length === 0 ? (
-        <p className="text-center text-gray-500">Nenhum ticket encontrado.</p>
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <p className="text-gray-400 mb-3">
+            Você ainda não tem nenhum ticket aberto.
+          </p>
+          <Link
+            href="/dashboard/tickets/new"
+            className="inline-flex items-center justify-center rounded-md bg-teal-500 px-4 py-2 text-sm font-medium text-white hover:bg-teal-400 transition"
+          >
+            + Criar primeiro ticket
+          </Link>
+        </div>
       ) : (
         <div>
           {tickets.map((ticket) => (
