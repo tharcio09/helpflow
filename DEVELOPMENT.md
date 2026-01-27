@@ -45,15 +45,16 @@ Este guia descreve como configurar o ambiente para rodar o projeto HelpFlow loca
     # Conexão com o banco de dados Supabase (Use a URL do Transaction Pooler!)
     DATABASE_URL="postgresql://postgres:[SUA_SENHA_SUPABASE]@[...pooler.supabase.com:6543/postgres](https://...pooler.supabase.com:6543/postgres)"
 
-    # Chaves de Autenticação do GitHub (Obtidas em Settings > Developer settings > OAuth Apps no GitHub)
-    AUTH_GITHUB_ID="SEU_CLIENT_ID_DO_GITHUB"
-    AUTH_GITHUB_SECRET="SEU_CLIENT_SECRET_DO_GITHUB"
-
-    # Chave Secreta para o NextAuth (Gerada com 'openssl rand -base64 32' no terminal)
-    AUTH_SECRET="SUA_CHAVE_SECRETA_LONGA_E_ALEATORIA"
+    # Chave Secreta para o NextAuth (OBRIGATÓRIA - Gerada com 'openssl rand -base64 32' no terminal)
+    NEXTAUTH_SECRET="SUA_CHAVE_SECRETA_LONGA_E_ALEATORIA"
 
     # URL base para o NextAuth em ambiente local
     NEXTAUTH_URL="http://localhost:3000"
+
+    # [OPCIONAL] Chaves de Autenticação do GitHub OAuth
+    # Deixe em branco se não quiser usar login com GitHub
+    AUTH_GITHUB_ID="SEU_CLIENT_ID_DO_GITHUB"
+    AUTH_GITHUB_SECRET="SEU_CLIENT_SECRET_DO_GITHUB"
     ```
 
 4.  **Sincronize o Schema do Prisma com o Banco de Dados:**
@@ -62,7 +63,22 @@ Este guia descreve como configurar o ambiente para rodar o projeto HelpFlow loca
     npx prisma db push
     ```
 
-## 4. Configuração da Autenticação (GitHub OAuth)
+## 4. Configuração da Autenticação
+
+O HelpFlow suporta dois métodos de autenticação:
+
+### 4.1 Autenticação com Email/Senha
+
+Este método já está configurado e pronto para uso! Os usuários podem:
+- Criar conta em `/register` com nome, email e senha
+- Fazer login em `/login` com suas credenciais
+- As senhas são criptografadas com bcrypt antes de serem armazenadas
+
+**Nenhuma configuração adicional é necessária para este método.**
+
+### 4.2 Autenticação com GitHub OAuth (Opcional)
+
+Se você deseja habilitar login via GitHub:
 
 1.  **Crie uma OAuth App no GitHub:**
     * Vá para `GitHub` > `Settings` > `Developer settings` > `OAuth Apps` > `New OAuth App`.

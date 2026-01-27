@@ -13,7 +13,9 @@ Este projeto demonstra habilidades sólidas em desenvolvimento Full-Stack, geren
 
 ## ✨ Funcionalidades Principais
 
-* **Autenticação Segura:** Login de usuários via GitHub (OAuth), garantindo acesso fácil e seguro.
+* **Autenticação Dual:** Login de usuários via **email/senha** ou **GitHub OAuth**, oferecendo flexibilidade e segurança.
+  * **Email/Senha:** Sistema completo de registro e autenticação com criptografia bcrypt.
+  * **GitHub OAuth:** Autenticação rápida usando conta do GitHub.
 * **Gerenciamento de Usuários:** Distinção entre dois tipos de usuários:
 * **Clientes:** Podem criar novos tickets e visualizar apenas os seus próprios tickets.
 * **Agentes:** Possuem acesso a todos os tickets, podendo visualizar detalhes, atualizar o status (Aberto, Em Progresso, Fechado) e deletar tickets.
@@ -29,7 +31,7 @@ Este projeto demonstra habilidades sólidas em desenvolvimento Full-Stack, geren
 O sistema implementa uma lógica de autorização baseada em dois papéis:
 
 * **`CLIENT` (Cliente):**
-    * Papel padrão para **todos os novos usuários** que se cadastram via GitHub (definido via `@default(CLIENT)` no schema Prisma).
+    * Papel padrão para **todos os novos usuários** que se cadastram (email/senha ou GitHub).
     * Pode criar novos tickets.
     * Pode visualizar apenas os tickets que criou.
 * **`AGENT` (Agente):**
@@ -45,7 +47,8 @@ O sistema implementa uma lógica de autorização baseada em dois papéis:
 * **Framework:** [Next.js](https://nextjs.org/) (App Router) - Para o desenvolvimento Full-Stack, renderização de componentes e API Routes.
 * **Linguagem:** JavaScript
 * **Estilização:** [Tailwind CSS](https://tailwindcss.com/) - Para um design responsivo e moderno.
-* **Autenticação:** [NextAuth.js](https://next-auth.js.org/) - Sistema completo de autenticação com provedores OAuth (GitHub).
+* **Autenticação:** [NextAuth.js](https://next-auth.js.org/) - Sistema completo de autenticação com CredentialsProvider e OAuth (GitHub).
+* **Segurança:** [bcryptjs](https://www.npmjs.com/package/bcryptjs) - Hash seguro de senhas para autenticação.
 * **ORM:** [Prisma](https://www.prisma.io/) - Gerenciamento de banco de dados, modelagem e consultas.
 * **Banco de Dados:** [Supabase](https://supabase.com/) (PostgreSQL) - Backend como serviço (BaaS), com banco de dados gerenciado.
 
