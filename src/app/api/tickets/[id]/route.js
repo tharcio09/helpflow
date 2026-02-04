@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
 
+
 const prisma = new PrismaClient();
 
 // FUNÇÃO GET
@@ -12,8 +13,8 @@ export async function GET(req, { params }) {
         return NextResponse.json({ message: 'Não autorizado' }, { status: 401 });
     }
   try {
-    const id = String(params?.id ?? '');
-    console.debug('[ticket GET] params.id=', params, 'resolved id=', id, 'session.user.id=', session?.user?.id);
+
+    const { id } = await params;
 
     const ticket = await prisma.ticket.findUnique({
       where: { id },
@@ -43,7 +44,7 @@ export async function PATCH(req, { params }) {
     return NextResponse.json({ message: 'Não autorizado' }, { status: 403 });
   }
 
-  const { id } = params;
+  const { id } = await params;
 
   try {
     const body = await req.json();
@@ -85,49 +86,35 @@ export async function PATCH(req, { params }) {
 }
 
 
-
-
-
 // FUNÇÃO PUT
 export async function PUT(req, { params }) {
     const session = await getServerSession(authOptions);
-    if (!session) {
-        return NextResponse.json({ message: 'Não autorizado' }, { status: 401 });
-    }
+    if (!session) return NextResponse.json({ message: 'Não autorizado' }, { status: 401 });
+
+    // 1. Desestrutura com await (A caixa é aberta aqui)
+    const { id } = await params; 
 
     try {
         const body = await req.json();
         const { title, description } = body;
 
-        if (!title || !description) {
-            return NextResponse.json({ message: 'Título e descrição são obrigatórios' }, { status: 400 });
-        }
-
+        // 2. Use a variável 'id' purinha, sem o 'params.' na frente
         const ticket = await prisma.ticket.findUnique({
-            where: { id: params.id },
+            where: { id }, 
         });
 
-        if (!ticket) {
-            return NextResponse.json({ message: 'Ticket não encontrado' }, { status: 404 });
-        }
-
-        if (ticket.agentId !== session.user.id) {
-            return NextResponse.json({ message: 'Não autorizado a editar este ticket' }, { status: 403 });
+        if (!ticket || ticket.agentId !== session.user.id) {
+            return NextResponse.json({ message: 'Não autorizado ou inexistente' }, { status: 403 });
         }
 
         const updatedTicket = await prisma.ticket.update({
-            where: { id: params.id },
+            where: { id }, // 3. Aqui também apenas 'id'
             data: { title, description },
         });
 
         return NextResponse.json(updatedTicket, { status: 200 });
-
     } catch (error) {
-        console.error("Erro ao atualizar o ticket:", error);
-        if (error.code === 'P2025') {
-            return NextResponse.json({ message: 'Ticket não encontrado para atualização' }, { status: 404 });
-        }
-        return NextResponse.json({ message: 'Erro interno do servidor' }, { status: 500 });
+        return NextResponse.json({ message: 'Erro interno' }, { status: 500 });
     }
 }
 
@@ -137,7 +124,8 @@ export async function DELETE(req, { params }) {
     return NextResponse.json({ message: 'Não autorizado' }, { status: 403 });
   }
 
-  const { id } = params;
+  const { id } = await params;
+  console.log("Deletando ticket:", id);
 
   try {
     const ticket = await prisma.ticket.findUnique({
