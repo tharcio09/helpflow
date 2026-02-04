@@ -1,28 +1,44 @@
 # 🚀 HelpFlow: Sistema de HelpDesk Completo
 
 ![Screenshot da Página de Detalhes de um Ticket no HelpFlow](public/screenshot.PNG) 
+
 ## 🌟 Visão Geral
 
 O HelpFlow é uma aplicação web Full-Stack robusta de sistema de HelpDesk (chamados), projetada para simplificar a comunicação e o gerenciamento de solicitações entre clientes e equipes de suporte (agentes). Desenvolvido com tecnologias modernas, o HelpFlow oferece uma solução eficiente e segura para o acompanhamento de problemas e tarefas.
 
 Este projeto demonstra habilidades sólidas em desenvolvimento Full-Stack, gerenciamento de banco de dados, autenticação e autorização baseada em papéis.
 
-**[➡️ Acesse a versão ao vivo aqui!](https://helpflow.vercel.app/)** 
-
----
+**[➡️ Acesse a versão ao vivo aqui!](https://helpflow.vercel.app/)** ---
 
 ## ✨ Funcionalidades Principais
 
 * **Autenticação Dual:** Login de usuários via **email/senha** ou **GitHub OAuth**, oferecendo flexibilidade e segurança.
   * **Email/Senha:** Sistema completo de registro e autenticação com criptografia bcrypt.
-  * **GitHub OAuth:** Autenticação rápida usando conta do GitHub.
+  * **GitHub OAuth:** Autenticação rápida e segura integrada ao banco de dados via **Prisma Adapter**.
 * **Gerenciamento de Usuários:** Distinção entre dois tipos de usuários:
-* **Clientes:** Podem criar novos tickets e visualizar apenas os seus próprios tickets.
-* **Agentes:** Possuem acesso a todos os tickets, podendo visualizar detalhes, atualizar o status (Aberto, Em Progresso, Fechado) e deletar tickets.
+  * **Clientes:** Podem criar novos tickets e visualizar apenas os seus próprios tickets.
+  * **Agentes:** Possuem acesso a todos os tickets, podendo visualizar detalhes, atualizar o status (Aberto, Em Progresso, Fechado) e deletar tickets.
 * **Criação de Tickets:** Clientes podem abrir novos chamados de forma intuitiva, fornecendo título e descrição detalhada do problema.
-* **Dashboard Interativo:** Visão geral dos tickets, com listagem dinâmica e exibição do status atual (atualização em tempo real após criação).
-* **Detalhes do Ticket:** Página dedicada para cada ticket, mostrando informações completas e opções de gerenciamento para agentes.
+* **Dashboard Interativo:** Visão geral dos tickets, com listagem dinâmica e exibição do status atual.
 * **API RESTful:** Backend eficiente para todas as operações CRUD (Create, Read, Update, Delete) de tickets.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+* **Framework:** [Next.js](https://nextjs.org/) (App Router v15)
+* **Linguagem:** JavaScript
+* **Estilização:** [Tailwind CSS](https://tailwindcss.com/)
+* **Autenticação:** [NextAuth.js](https://next-auth.js.org/) com Prisma Adapter.
+* **Segurança:** [bcryptjs](https://www.npmjs.com/package/bcryptjs) para hash de senhas.
+* **ORM:** [Prisma](https://www.prisma.io/)
+* **Banco de Dados:** [Supabase](https://supabase.com/) (PostgreSQL)
+
+[![My Skills](https://skillicons.dev/icons?i=nextjs,react,tailwind,prisma,supabase)](https://skillicons.dev)
+
+> [!IMPORTANT]
+> ### 💡 Notas de Implementação (Next.js 15)
+> Este projeto utiliza as **Dynamic APIs** assíncronas do Next.js 15. Seguindo as novas convenções do framework, o acesso a parâmetros de rotas dinâmicas (como `params.id`) foi implementado de forma assíncrona utilizando `await params` em todas as rotas de API (`GET`, `PUT`, `PATCH`, `DELETE`), garantindo alta performance e compatibilidade com as versões mais recentes.
 
 ---
 
@@ -30,36 +46,12 @@ Este projeto demonstra habilidades sólidas em desenvolvimento Full-Stack, geren
 
 O sistema implementa uma lógica de autorização baseada em dois papéis:
 
-* **`CLIENT` (Cliente):**
-    * Papel padrão para **todos os novos usuários** que se cadastram (email/senha ou GitHub).
-    * Pode criar novos tickets.
-    * Pode visualizar apenas os tickets que criou.
-* **`AGENT` (Agente):**
-    * **Atribuição:** Atualmente, a promoção de um usuário para `AGENT` é feita **manualmente** pelo administrador diretamente no banco de dados (Supabase).
-    * Pode visualizar **todos** os tickets de todos os clientes.
-    * Pode atualizar o status (`Aberto`, `Em Progresso`, `Fechado`) de qualquer ticket.
-    * Pode deletar qualquer ticket.
+* **`CLIENT` (Cliente):** Papel padrão para novos usuários. Pode criar e visualizar apenas seus próprios tickets.
+* **`AGENT` (Agente):** Acesso total. Pode visualizar todos os tickets, atualizar status e excluir registros. Atribuição manual via banco de dados.
 
 ---
-
-## 🛠️ Tecnologias Utilizadas
-
-* **Framework:** [Next.js](https://nextjs.org/) (App Router) - Para o desenvolvimento Full-Stack, renderização de componentes e API Routes.
-* **Linguagem:** JavaScript
-* **Estilização:** [Tailwind CSS](https://tailwindcss.com/) - Para um design responsivo e moderno.
-* **Autenticação:** [NextAuth.js](https://next-auth.js.org/) - Sistema completo de autenticação com CredentialsProvider e OAuth (GitHub).
-* **Segurança:** [bcryptjs](https://www.npmjs.com/package/bcryptjs) - Hash seguro de senhas para autenticação.
-* **ORM:** [Prisma](https://www.prisma.io/) - Gerenciamento de banco de dados, modelagem e consultas.
-* **Banco de Dados:** [Supabase](https://supabase.com/) (PostgreSQL) - Backend como serviço (BaaS), com banco de dados gerenciado.
-
-[![My Skills](https://skillicons.dev/icons?i=nextjs,react,tailwind,prisma,supabase)](https://skillicons.dev)
-
----
-
 
 ## 🚀 Como Rodar Localmente
-
-Para configurar e executar o HelpFlow no seu ambiente de desenvolvimento:
 
 1.  **Clone o repositório:**
     ```bash
@@ -67,8 +59,20 @@ Para configurar e executar o HelpFlow no seu ambiente de desenvolvimento:
     cd helpflow
     ```
 
-2.  **Siga as instruções detalhadas de configuração:**
-    Consulte o arquivo [`DEVELOPMENT.md`](./DEVELOPMENT.md) na raiz do projeto para obter informações sobre variáveis de ambiente (`.env`), configuração do Supabase, GitHub OAuth e como iniciar o servidor.
+2.  **Instale as dependências:**
+    ```bash
+    npm install
+    ```
+
+3.  **Prepare o Banco de Dados:**
+    Após configurar seu `.env`, execute as migrações para criar as tabelas necessárias (incluindo as tabelas de suporte ao NextAuth):
+    ```bash
+    npx prisma migrate dev
+    npx prisma generate
+    ```
+
+4.  **Consulte o guia detalhado:**
+    Veja o arquivo [`DEVELOPMENT.md`](./DEVELOPMENT.md) para detalhes sobre variáveis de ambiente e configuração do GitHub OAuth.
 
 ---
 
@@ -77,4 +81,4 @@ Para configurar e executar o HelpFlow no seu ambiente de desenvolvimento:
 **Tharcio Santos**
 
 * [LinkedIn](https://www.linkedin.com/in/tharcio-santos/)
-* [Email](tharciosantos09@gmail.com)
+* [Email](mailto:tharciosantos09@gmail.com)
