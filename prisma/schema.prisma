@@ -12,7 +12,7 @@ model User {
   id            String    @id @default(uuid())
   name          String?
   email         String    @unique
-  emailVerified DateTime? // Campo exigido pelo NextAuth
+  emailVerified DateTime?
   password_hash String?
   image         String?
   role          String    @default("user")
@@ -20,9 +20,11 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  tickets       Ticket[]
-  accounts      Account[] // Relação com contas sociais
-  sessions      Session[] // Relação com sessões
+  createdTickets  Ticket[] @relation("TicketAuthor")
+  assignedTickets Ticket[] @relation("TicketAgent")
+
+  accounts Account[]
+  sessions Session[]
 }
 
 model Ticket {
@@ -33,8 +35,11 @@ model Ticket {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  agentId     String
-  agent       User     @relation(fields: [agentId], references: [id])
+  authorId String
+  author   User @relation("TicketAuthor", fields: [authorId], references: [id])
+
+  agentId String?
+  agent   User? @relation("TicketAgent", fields: [agentId], references: [id])
 }
 
 enum Status {
