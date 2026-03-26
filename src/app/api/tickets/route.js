@@ -16,13 +16,13 @@ export async function POST(req) {
     const body = await req.json();
     const { title, description } = body;
 
-    const agentId = session.user.id;
+    const authorId = session.user.id;
 
     const newTicket = await prisma.ticket.create({
       data: {
         title,
         description,
-        agentId,
+        authorId,
       },
     });
 
@@ -50,9 +50,9 @@ export async function GET(req) {
   try {
     const tickets = await prisma.ticket.findMany({
       where: {
-        agentId: session.user.id,
+        authorId: session.user.id,
       },
-      include: { agent: true },
+      include: { author: true },
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(tickets, { status: 200 });
