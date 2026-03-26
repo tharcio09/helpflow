@@ -56,7 +56,7 @@ export default function TicketDetailsPage() {
 
     const handleStatusUpdate = async () => {
         if (!['OPEN', 'IN_PROGRESS', 'CLOSED'].includes(newStatus)) {
-             return setError('Selecione um status válido');
+            return setError('Selecione um status válido');
         }
         setError('');
         try {
@@ -87,19 +87,19 @@ export default function TicketDetailsPage() {
         setIsDeleting(true);
         setError('');
         try {
-          const res = await fetch(`/api/tickets/${id}`, { method: 'DELETE' });
-          if (!res.ok) {
-            if (res.status === 404) throw new Error('Ticket não encontrado para exclusão.');
-            if (res.status === 403 || res.status === 401) throw new Error('Não autorizado para deletar.');
-            throw new Error('Falha ao deletar o ticket.');
-          }
-          router.push('/dashboard');
-          router.refresh();
+            const res = await fetch(`/api/tickets/${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                if (res.status === 404) throw new Error('Ticket não encontrado para exclusão.');
+                if (res.status === 403 || res.status === 401) throw new Error('Não autorizado para deletar.');
+                throw new Error('Falha ao deletar o ticket.');
+            }
+            router.push('/dashboard');
+            router.refresh();
         } catch (err) {
-          console.error('Erro ao deletar ticket:', err);
-          setError(err.message || 'Erro ao deletar o ticket.');
+            console.error('Erro ao deletar ticket:', err);
+            setError(err.message || 'Erro ao deletar o ticket.');
         } finally {
-          setIsDeleting(false);
+            setIsDeleting(false);
         }
     };
 
@@ -122,11 +122,10 @@ export default function TicketDetailsPage() {
                 <div className="p-6 bg-gray-800 rounded-lg shadow-md">
                     <div className="flex justify-between items-start mb-4">
                         <h1 className="text-3xl font-bold">{ticket.title}</h1>
-                        <span className={`px-3 py-1 text-sm font-bold rounded-full ${
-                            ticket.status === 'OPEN' ? 'bg-green-600 text-white' :
+                        <span className={`px-3 py-1 text-sm font-bold rounded-full ${ticket.status === 'OPEN' ? 'bg-green-600 text-white' :
                             ticket.status === 'IN_PROGRESS' ? 'bg-yellow-500 text-black' :
-                            'bg-gray-600 text-gray-300'
-                        }`}>
+                                'bg-gray-600 text-gray-300'
+                            }`}>
                             {getStatusDisplayNamePT(ticket.status)}
                         </span>
                     </div>
