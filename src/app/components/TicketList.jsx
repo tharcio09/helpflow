@@ -122,10 +122,9 @@ export default function TicketList({
                   <span
                     className={`
                       px-3 py-1 text-xs rounded-full font-medium
-                      ${
-                        ticket.status === "OPEN"
-                          ? "bg-green-700/40 text-green-300"
-                          : ticket.status === "IN_PROGRESS"
+                      ${ticket.status === "OPEN"
+                        ? "bg-green-700/40 text-green-300"
+                        : ticket.status === "IN_PROGRESS"
                           ? "bg-yellow-600/30 text-yellow-300"
                           : "bg-gray-600/40 text-gray-300"
                       }
@@ -143,9 +142,9 @@ export default function TicketList({
                 {/* AUTOR + DATA */}
                 <p className="mt-3 text-xs text-gray-500">
                   Criado por{" "}
-                  <span className="text-gray-300 font-medium">
-                    {ticket.agent?.name ?? "Desconhecido"}
-                  </span>{" "}
+                  <span>
+                    Criado por: {ticket.author?.name || ticket.author?.email || 'Desconhecido'}
+                  </span>
                   em{" "}
                   <span className="text-gray-400">
                     {new Date(ticket.createdAt).toLocaleDateString("pt-BR")}
@@ -153,7 +152,7 @@ export default function TicketList({
                 </p>
 
                 {/* CONTROLES (somente dono) */}
-                {session?.user?.id === ticket.agentId && (
+                {session?.user?.id === ticket.authorId && (
                   <div className="mt-4 flex flex-col gap-3">
 
                     {/* SELECT STATUS (agora pequeno e minimalista) */}
