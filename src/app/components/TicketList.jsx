@@ -141,11 +141,10 @@ export default function TicketList({
 
                 {/* AUTOR + DATA */}
                 <p className="mt-3 text-xs text-gray-500">
-                  Criado por{" "}
                   <span>
                     Criado por: {ticket.author?.name || ticket.author?.email || 'Desconhecido'}
                   </span>
-                  em{" "}
+                  {" "} em {" "}
                   <span className="text-gray-400">
                     {new Date(ticket.createdAt).toLocaleDateString("pt-BR")}
                   </span>
