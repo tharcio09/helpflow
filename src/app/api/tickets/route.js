@@ -48,10 +48,10 @@ export async function GET(req) {
   }
 
   try {
+    const role = session.user.role || 'CLIENT'; // fallback defensivo para usuários legados
+
     const tickets = await prisma.ticket.findMany({
-      where: {
-        authorId: session.user.id,
-      },
+      where: role === 'AGENT' ? {} : { authorId: session.user.id },
       include: { author: true },
       orderBy: { createdAt: "desc" },
     });
