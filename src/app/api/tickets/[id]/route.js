@@ -26,7 +26,11 @@ export async function GET(req, { params }) {
       return NextResponse.json({ message: 'Ticket não encontrado' }, { status: 404 });
     }
 
-    if (ticket.authorId !== session.user.id) {
+    const role    = session.user.role || 'CLIENT';
+    const isOwner = ticket.authorId === session.user.id;
+    const isAgent = role === 'AGENT';
+
+    if (!isOwner && !isAgent) {
       return NextResponse.json({ message: 'Não autorizado' }, { status: 403 });
     }
 
@@ -63,8 +67,12 @@ export async function PATCH(req, { params }) {
       return NextResponse.json({ message: 'Ticket não encontrado' }, { status: 404 });
     }
 
-    // Verifica dono
-    if (ticket.authorId !== session.user.id) {
+    // Verifica dono ou role de AGENT
+    const role    = session.user.role || 'CLIENT';
+    const isOwner = ticket.authorId === session.user.id;
+    const isAgent = role === 'AGENT';
+
+    if (!isOwner && !isAgent) {
       return NextResponse.json({ message: 'Não autorizado' }, { status: 403 });
     }
 
@@ -103,8 +111,16 @@ export async function PUT(req, { params }) {
       where: { id },
     });
 
-    if (!ticket || ticket.authorId !== session.user.id) {
-      return NextResponse.json({ message: 'Não autorizado ou inexistente' }, { status: 403 });
+    if (!ticket) {
+      return NextResponse.json({ message: 'Ticket não encontrado' }, { status: 404 });
+    }
+
+    const role    = session.user.role || 'CLIENT';
+    const isOwner = ticket.authorId === session.user.id;
+    const isAgent = role === 'AGENT';
+
+    if (!isOwner && !isAgent) {
+      return NextResponse.json({ message: 'Não autorizado' }, { status: 403 });
     }
 
     const updatedTicket = await prisma.ticket.update({
@@ -136,7 +152,11 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ message: 'Ticket não encontrado' }, { status: 404 });
     }
 
-    if (ticket.authorId !== session.user.id) {
+    const role    = session.user.role || 'CLIENT';
+    const isOwner = ticket.authorId === session.user.id;
+    const isAgent = role === 'AGENT';
+
+    if (!isOwner && !isAgent) {
       return NextResponse.json({ message: 'Não autorizado a excluir este ticket' }, { status: 403 });
     }
 
