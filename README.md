@@ -20,19 +20,11 @@ Painel principal com listagem dinâmica dos tickets e seus respectivos status.
 
 ## 🌟 Visão Geral
 
-O **HelpFlow** é uma aplicação web Full-Stack de sistema de HelpDesk (gerenciamento de chamados), projetada para facilitar a comunicação entre clientes e equipes de suporte.
+**HelpFlow** é um sistema de helpdesk full-stack construído com Next.js 15, Prisma e PostgreSQL. O projeto implementa autenticação com múltiplos provedores (credentials + GitHub OAuth) e controle de acesso baseado em papéis (RBAC), com autorização aplicada no servidor em todas as rotas protegidas.
 
-A aplicação permite abertura, acompanhamento e gerenciamento de tickets de forma eficiente, com autenticação segura e controle de acesso baseado em papéis.
+O objetivo foi construir uma aplicação funcional e segura, tomando decisões técnicas reais: escolha de estratégia JWT para sessões, propagação de `role` como claim no token, e separação entre o que o frontend exibe e o que o backend efetivamente permite.
 
-👉 Este projeto demonstra habilidades práticas em:
-
-* Desenvolvimento Full-Stack
-* Autenticação e autorização
-* Integração com banco de dados
-* Arquitetura moderna com Next.js
-
-🔗 **Acesse a aplicação em produção:**
-https://helpflow.vercel.app/
+🔗 **Aplicação em produção:** https://helpflow.vercel.app/
 
 ---
 
@@ -46,15 +38,21 @@ https://helpflow.vercel.app/
 
 ### 👥 Controle de Acesso (RBAC)
 
-* **CLIENT**
+O sistema implementa RBAC (Role-Based Access Control) com dois papéis distintos. No login, o `role` é incluído como claim no token JWT e propagado para a sessão via NextAuth, tornando-o disponível em todas as rotas. A autorização é aplicada no servidor com base em `role` e `ownership` do ticket — o frontend reflete essas permissões, mas o enforcement real é sempre server-side.
+
+* **CLIENT** *(papel padrão)*
 
   * Cria tickets
   * Visualiza apenas seus próprios chamados
+  * Edita e remove apenas os tickets que abriu
+
 * **AGENT**
 
-  * Visualiza todos os tickets
-  * Atualiza status
-  * Remove tickets
+  * Visualiza todos os tickets do sistema
+  * Atualiza o status de qualquer ticket
+  * Edita e remove qualquer ticket, independentemente do autor
+
+> A autorização é aplicada nas rotas da API com base em `role` e `ownership`. O frontend reflete as permissões do backend — mas a validação real ocorre no servidor, não na interface.
 
 ### 📝 Gestão de Tickets
 
@@ -164,7 +162,9 @@ https://helpflow.vercel.app/api/auth/callback/github
 
 ## 📌 Notas Técnicas
 
-> Este projeto utiliza as APIs dinâmicas do Next.js 15, com suporte assíncrono para parâmetros de rota (`await params`), seguindo as práticas mais recentes do framework.
+> **Next.js 15:** O projeto utiliza o App Router com suporte assíncrono para parâmetros de rota (`await params`), seguindo as práticas mais recentes do framework.
+
+> **Autorização:** O RBAC é aplicado diretamente nas Route Handlers da API. Cada endpoint verifica `role` e `ownership` de forma independente, sem depender da interface para restringir acesso. Usuários com role `AGENT` têm esses privilégios concedidos exclusivamente via claim JWT — não por parâmetro enviado pelo cliente.
 
 ---
 
