@@ -33,7 +33,7 @@ export async function POST(req) {
                 email,
                 password_hash: hashedPassword,
                 auth_provider: 'credentials',
-                role: 'user',
+                role: 'CLIENT',
             },
         });
 
