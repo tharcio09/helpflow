@@ -150,8 +150,8 @@ export default function TicketList({
                   </span>
                 </p>
 
-                {/* CONTROLES (somente dono) */}
-                {session?.user?.id === ticket.authorId && (
+                {/* CONTROLES (dono ou AGENT) */}
+                {(session?.user?.id === ticket.authorId || session?.user?.role === 'AGENT') && (
                   <div className="mt-4 flex flex-col gap-3">
 
                     {/* SELECT STATUS (agora pequeno e minimalista) */}
