@@ -1,128 +1,118 @@
-# Guia de Desenvolvimento Local - HelpFlow
+# Desenvolvimento Local
 
-Este guia descreve como configurar o ambiente para rodar o projeto HelpFlow localmente, utilizando Next.js, Prisma, Supabase e NextAuth.js.
+Guia prático para configurar e rodar o HelpFlow localmente com `Next.js`, `Prisma`, `PostgreSQL` e `NextAuth.js`.
 
-## 1. Pré-requisitos
+## Pré-requisitos
 
-* Node.js (versão recomendada: 18 ou superior)
-* npm ou yarn
-* Git instalado e configurado
-* Conta no [GitHub](https://github.com/)
-* Conta no [Supabase](https://supabase.com/)
+- `Node.js 18+`
+- `npm`
+- `Git`
+- Conta no [GitHub](https://github.com/)
+- Conta no [Supabase](https://supabase.com/) se for usar a mesma estratégia de banco em nuvem
 
-## 2. Configuração Inicial
+## Setup inicial
 
-1.  **Clone o repositório:**
-    ```bash
-    git clone [https://github.com/tharcio09/helpflow.git](https://github.com/tharcio09/helpflow.git) # Substitua pela URL correta do seu repo
-    cd helpflow
-    ```
+### 1. Clone o projeto
 
-2.  **Instale as dependências:**
-    ```bash
-    npm install
-    ```
-
-## 3. Configuração do Banco de Dados (Supabase + Prisma)
-
-1.  **Crie um projeto no Supabase:**
-    * Crie um novo projeto no painel do Supabase.
-    * Anote a **senha do banco de dados** que você definir.
-
-2.  **Obtenha a URL de Conexão (Transaction Pooler):**
-    * No painel do seu projeto Supabase, vá para `Project Settings` (⚙️) > `Database`.
-    * Role para baixo até a seção `Connection Pooler`.
-    * Selecione o método `Transaction pooler`.
-    * Copie a **URL de conexão** fornecida (ela usará a porta `6543`).
-
-3.  **Configure as Variáveis de Ambiente:**
-    * Crie um arquivo chamado `.env` na raiz do projeto.
-    * Cole o conteúdo abaixo, substituindo os placeholders pelos seus valores:
-
-    ```env
-    # .env
-
-    # Conexão com o banco de dados Supabase (Use a URL do Transaction Pooler!)
-    DATABASE_URL="postgresql://postgres:[SUA_SENHA_SUPABASE]@[...pooler.supabase.com:6543/postgres](https://...pooler.supabase.com:6543/postgres)"
-
-    # Chave Secreta para o NextAuth (OBRIGATÓRIA - Gerada com 'openssl rand -base64 32' no terminal)
-    NEXTAUTH_SECRET="SUA_CHAVE_SECRETA_LONGA_E_ALEATORIA"
-
-    # URL base para o NextAuth em ambiente local
-    NEXTAUTH_URL="http://localhost:3000"
-
-    # [OPCIONAL] Chaves de Autenticação do GitHub OAuth
-    # Deixe em branco se não quiser usar login com GitHub
-    AUTH_GITHUB_ID="SEU_CLIENT_ID_DO_GITHUB"
-    AUTH_GITHUB_SECRET="SEU_CLIENT_SECRET_DO_GITHUB"
-    ```
-
-4.  **Sincronize o Schema do Prisma com o Banco de Dados:**
-    Este comando criará as tabelas no seu banco de dados Supabase com base no arquivo `prisma/schema.prisma`.
-    ```bash
-    npx prisma db push
-    ```
-
-## 4. Configuração da Autenticação
-
-O HelpFlow suporta dois métodos de autenticação:
-
-### 4.1 Autenticação com Email/Senha
-
-Este método já está configurado e pronto para uso! Os usuários podem:
-- Criar conta em `/register` com nome, email e senha
-- Fazer login em `/login` com suas credenciais
-- As senhas são criptografadas com bcrypt antes de serem armazenadas
-
-**Nenhuma configuração adicional é necessária para este método.**
-
-### 4.2 Autenticação com GitHub OAuth (Opcional)
-
-Se você deseja habilitar login via GitHub:
-
-1.  **Crie uma OAuth App no GitHub:**
-    * Vá para `GitHub` > `Settings` > `Developer settings` > `OAuth Apps` > `New OAuth App`.
-    * **Application name:** `HelpFlow` (ou similar)
-    * **Homepage URL:** `http://localhost:3000`
-    * **Authorization callback URL:** `http://localhost:3000/api/auth/callback/github`
-    * Registre a aplicação.
-    * Gere um **Client Secret**.
-    * Copie o **Client ID** e o **Client Secret** e coloque-os no seu arquivo `.env`.
-
-## 5. Rodando o Projeto
-
-1.  **Inicie o servidor de desenvolvimento:**
-    ```bash
-    npm run dev
-    ```
-
-2.  Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
-
-## 6. Comandos Úteis do Prisma
-
-* **Sincronizar schema após mudanças:**
-  ```bash
-  npx prisma db push
-````
-
-  * **Gerar/Atualizar o Prisma Client:** (Útil se o VS Code não estiver reconhecendo tipos do Prisma)
-    ```bash
-    npx prisma generate
-    ```
-  * **Abrir o Prisma Studio:** (Uma interface gráfica para ver e editar seu banco de dados localmente)
-    ```bash
-    npx prisma studio
-    ```
-
-## 7. Solução de Problemas Comuns
-
-  * **Erro `prepared statement ... exists` ou `does not exist` no terminal:**
-    Este é um problema conhecido da interação entre Prisma, Supabase Pooler e o hot-reloading do Next.js no ambiente de desenvolvimento.
-    **Solução:** Pare o servidor de desenvolvimento (`Ctrl+C`) e reinicie-o (`npm run dev`).
-  * **Erro `Can't reach database server`:**
-    Verifique se a `DATABASE_URL` no `.env` está correta (usando a URL do **Transaction Pooler**, porta `6543`), se a senha está correta e se o projeto Supabase não está pausado.
-
------
-
+```bash
+git clone https://github.com/tharcio09/helpflow.git
+cd helpflow
 ```
+
+### 2. Instale as dependências
+
+```bash
+npm install
 ```
+
+### 3. Configure o `.env`
+
+Crie um `.env` na raiz com base em `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Exemplo:
+
+```env
+AUTH_GITHUB_ID=
+AUTH_GITHUB_SECRET=
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=gere-uma-chave-segura
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:6543/postgres
+DIRECT_URL=postgresql://USER:PASSWORD@HOST:5432/postgres
+```
+
+## Banco de dados
+
+### Supabase + Prisma
+
+- `DATABASE_URL`: use a URL do pooler/transação, normalmente na porta `6543`
+- `DIRECT_URL`: use a conexão direta do banco, normalmente na porta `5432`
+- Ajuste ambas conforme o projeto criado no Supabase
+
+Para sincronizar o schema atual:
+
+```bash
+npx prisma db push
+npx prisma generate
+```
+
+Se quiser inspecionar os dados:
+
+```bash
+npx prisma studio
+```
+
+## Autenticação
+
+### Email e senha
+
+- O cadastro está disponível em `/register`
+- O login por credenciais está disponível em `/login`
+- As senhas são armazenadas com hash via `bcryptjs`
+- Novos usuários são criados com papel `CLIENT`
+
+### GitHub OAuth
+
+Para habilitar login com GitHub:
+
+1. Crie uma OAuth App em `GitHub > Settings > Developer settings > OAuth Apps`
+2. Defina `Homepage URL` como `http://localhost:3000`
+3. Defina `Authorization callback URL` como `http://localhost:3000/api/auth/callback/github`
+4. Copie `Client ID` e `Client Secret` para `AUTH_GITHUB_ID` e `AUTH_GITHUB_SECRET`
+
+## Executando o projeto
+
+```bash
+npm run dev
+```
+
+Acesse [http://localhost:3000](http://localhost:3000).
+
+## Comandos úteis
+
+- `npm run lint` verifica problemas de lint
+- `npx prisma db push` sincroniza o schema sem gerar migration
+- `npx prisma generate` recria o Prisma Client
+- `npx prisma studio` abre o painel visual do banco
+
+## Problemas comuns
+
+### Prisma + Supabase Pooler
+
+Se aparecer erro relacionado a `prepared statement` durante o desenvolvimento:
+
+- pare o servidor
+- rode `npm run dev` novamente
+
+Esse problema costuma acontecer por causa do hot reload combinado com o pooler do Supabase.
+
+### Falha de conexão com o banco
+
+Se aparecer `Can't reach database server`:
+
+- valide `DATABASE_URL` e `DIRECT_URL`
+- confira se o projeto Supabase está ativo
+- confirme usuário, senha, host e portas
