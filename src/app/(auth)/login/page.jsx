@@ -104,6 +104,7 @@ export default function LoginPage() {
                                 Email
                             </label>
                             <input
+                                data-cy="login-email"
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -118,6 +119,7 @@ export default function LoginPage() {
                                 Senha
                             </label>
                             <input
+                                data-cy="login-password"
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -128,6 +130,7 @@ export default function LoginPage() {
                         </div>
 
                         <button
+                            data-cy="login-submit"
                             type="submit"
                             disabled={loading}
                             className="w-full rounded-md bg-teal-500 px-4 py-2 font-semibold text-white transition hover:bg-teal-400 disabled:bg-teal-700"
@@ -143,6 +146,7 @@ export default function LoginPage() {
                     </div>
 
                     <button
+                        data-cy="login-github"
                         onClick={handleGitHubLogin}
                         className="flex w-full items-center justify-center gap-2 rounded-md border border-white/20 bg-slate-900/60 px-4 py-2 font-medium text-white transition hover:bg-slate-800"
                     >
@@ -152,7 +156,7 @@ export default function LoginPage() {
 
                     <p className="mt-6 text-center text-sm text-gray-300">
                         Não tem uma conta?{" "}
-                        <Link href="/register" className="font-medium text-teal-400 hover:text-teal-300">
+                        <Link href="/register" data-cy="login-register-link" className="font-medium text-teal-400 hover:text-teal-300">
                             Criar conta
                         </Link>
                     </p>

@@ -20,6 +20,7 @@ export default function AuthButtons() {
           </span>
         </div>
         <button
+          data-cy="auth-logout"
           onClick={() => signOut({ callbackUrl: "/login" })}
           className="rounded-md bg-red-500 px-3 py-1 text-sm font-medium text-white hover:bg-red-600"
         >
@@ -33,12 +34,14 @@ export default function AuthButtons() {
     <div className="flex items-center gap-3">
       <span className="text-sm text-gray-700">Você não está autenticado.</span>
       <button
+        data-cy="auth-github-login"
         onClick={() => signIn("github")}
         className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50"
       >
         Entrar com GitHub
       </button>
       <Link
+        data-cy="auth-email-login-link"
         href="/login"
         className="rounded-md bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
       >

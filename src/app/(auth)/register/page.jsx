@@ -89,6 +89,7 @@ export default function RegisterPage() {
               Nome
             </label>
             <input
+              data-cy="register-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -102,6 +103,7 @@ export default function RegisterPage() {
               Email
             </label>
             <input
+              data-cy="register-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -116,6 +118,7 @@ export default function RegisterPage() {
               Senha
             </label>
             <input
+              data-cy="register-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -131,6 +134,7 @@ export default function RegisterPage() {
               Confirmar senha
             </label>
             <input
+              data-cy="register-confirm-password"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -142,6 +146,7 @@ export default function RegisterPage() {
           </div>
 
           <button
+            data-cy="register-submit"
             type="submit"
             disabled={loading}
             className="w-full rounded-md bg-teal-500 px-4 py-2 font-semibold text-white transition hover:bg-teal-400 disabled:bg-teal-700"
@@ -153,6 +158,7 @@ export default function RegisterPage() {
         <p className="mt-6 text-center text-sm text-gray-300">
           Já tem uma conta?{" "}
           <Link
+            data-cy="register-login-link"
             href="/login"
             className="font-medium text-teal-400 hover:text-teal-300"
           >
