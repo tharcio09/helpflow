@@ -22,6 +22,7 @@ export default function UserProfile() {
         </div>
       </div>
       <button
+        data-cy="user-logout"
         onClick={() => signOut({ callbackUrl: '/' })}
         className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-sm text-red-400 hover:bg-red-900/50 transition-colors"
       >

@@ -5,12 +5,13 @@ import { LuLayoutDashboard, LuTicketPlus } from 'react-icons/lu';
 
 import { usePathname } from 'next/navigation'; 
 
-export default function SidebarNav() {
+export default function SidebarNav({ dataCyPrefix = 'sidebar' }) {
   const pathname = usePathname();
 
   return (
     <nav className="space-y-4">
       <Link 
+        data-cy={`${dataCyPrefix}-dashboard-link`}
         href="/dashboard" 
         className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
           pathname === '/dashboard' ? 'bg-indigo-600' : 'hover:bg-indigo-600' 
@@ -20,6 +21,7 @@ export default function SidebarNav() {
         <span>Dashboard</span>
       </Link>
       <Link 
+        data-cy={`${dataCyPrefix}-new-ticket-link`}
         href="/dashboard/tickets/new" 
         className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
           pathname === '/dashboard/tickets/new' ? 'bg-indigo-600' : 'hover:bg-indigo-600' 
