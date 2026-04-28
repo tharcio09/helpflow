@@ -118,7 +118,7 @@ export default function TicketDetailsPage() {
     return (
         <main className="min-h-screen text-white p-8">
             <div className="max-w-4xl mx-auto">
-                <Link href="/dashboard" className="text-indigo-400 hover:text-indigo-300 mb-8 block">&larr; Voltar para a lista</Link>
+                <Link href="/dashboard" data-cy="ticket-detail-back-link" className="text-indigo-400 hover:text-indigo-300 mb-8 block">&larr; Voltar para a lista</Link>
                 <div className="p-6 bg-gray-800 rounded-lg shadow-md">
                     <div className="flex justify-between items-start mb-4">
                         <h1 className="text-3xl font-bold">{ticket.title}</h1>
@@ -143,6 +143,7 @@ export default function TicketDetailsPage() {
                         <div className="flex flex-wrap items-center gap-4">
                             <div className="flex items-center gap-2">
                                 <select
+                                    data-cy="ticket-detail-status"
                                     value={newStatus}
                                     onChange={(e) => setNewStatus(e.target.value)}
                                     className="bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none"
@@ -151,10 +152,11 @@ export default function TicketDetailsPage() {
                                     <option value="IN_PROGRESS">Em Progresso</option>
                                     <option value="CLOSED">Fechado</option>
                                 </select>
-                                <button onClick={handleStatusUpdate} className="py-2 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-md font-semibold">Atualizar Status</button>
+                                <button data-cy="ticket-detail-status-submit" onClick={handleStatusUpdate} className="py-2 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-md font-semibold">Atualizar Status</button>
                             </div>
 
                             <button
+                                data-cy="ticket-detail-delete"
                                 onClick={handleDeleteTicket}
                                 disabled={isDeleting}
                                 className={`py-2 px-4 rounded-md font-semibold ${isDeleting ? 'bg-gray-600 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}

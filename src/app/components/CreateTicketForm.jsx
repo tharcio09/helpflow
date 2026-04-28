@@ -39,6 +39,7 @@ export default function CreateTicketForm({ onTicketCreated }) {
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-300">Título</label>
           <input
+            data-cy="ticket-create-title"
             type="text"
             id="title"
             value={title}
@@ -50,6 +51,7 @@ export default function CreateTicketForm({ onTicketCreated }) {
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-300">Descrição do Problema</label>
           <textarea
+            data-cy="ticket-create-description"
             id="description"
             rows={4}
             value={description}
@@ -61,6 +63,7 @@ export default function CreateTicketForm({ onTicketCreated }) {
       </div>
       <div className="mt-6 text-center">
         <button
+          data-cy="ticket-create-submit"
           type="submit"
           className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >

@@ -45,6 +45,7 @@ export default function EditTicketForm({ ticket, onTicketUpdated }) {
                     Título
                 </label>
                 <input
+                    data-cy="ticket-edit-title"
                     type="text"
                     id="title"
                     value={title}
@@ -58,6 +59,7 @@ export default function EditTicketForm({ ticket, onTicketUpdated }) {
                     Descrição
                 </label>
                 <textarea
+                    data-cy="ticket-edit-description"
                     id="description"
                     rows="4"
                     value={description}
@@ -68,6 +70,7 @@ export default function EditTicketForm({ ticket, onTicketUpdated }) {
             </div>
             <div className="flex justify-end">
                 <button
+                    data-cy="ticket-edit-submit"
                     type="submit"
                     disabled={loading}
                     className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"

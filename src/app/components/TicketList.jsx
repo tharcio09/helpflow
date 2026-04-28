@@ -95,6 +95,7 @@ export default function TicketList({
             Você ainda não tem nenhum ticket aberto.
           </p>
           <Link
+            data-cy="ticket-empty-create-link"
             href="/dashboard/tickets/new"
             className="inline-flex items-center justify-center rounded-md bg-teal-500 px-4 py-2 text-sm font-medium text-white hover:bg-teal-400 transition"
           >
@@ -110,6 +111,7 @@ export default function TicketList({
                 {/* TÍTULO + STATUS */}
                 <div className="flex items-center justify-between mb-2">
                   <Link
+                    data-cy={`ticket-${ticket.id}-detail-link`}
                     href={`/ticket/${ticket.id}`}
                     className="hover:underline"
                   >
@@ -156,6 +158,7 @@ export default function TicketList({
 
                     {/* SELECT STATUS (agora pequeno e minimalista) */}
                     <select
+                      data-cy={`ticket-${ticket.id}-status`}
                       disabled={updatingId === ticket.id}
                       value={ticket.status}
                       onChange={(e) =>
@@ -171,6 +174,7 @@ export default function TicketList({
                     {/* EDITAR + EXCLUIR */}
                     <div className="flex gap-4 text-sm">
                       <Link
+                        data-cy={`ticket-${ticket.id}-edit-link`}
                         href={`/dashboard/ticket/${ticket.id}/edit`}
                         className="text-blue-400 hover:text-blue-300"
                       >
@@ -178,6 +182,7 @@ export default function TicketList({
                       </Link>
 
                       <button
+                        data-cy={`ticket-${ticket.id}-delete`}
                         onClick={() => handleDelete(ticket.id)}
                         disabled={deletingId === ticket.id}
                         className="text-red-400 hover:text-red-300 disabled:opacity-50"

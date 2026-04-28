@@ -63,6 +63,7 @@ export default function DashboardPage() {
         </div>
 
         <Link
+          data-cy="dashboard-new-ticket-link"
           href="/dashboard/tickets/new"
           className="inline-flex items-center justify-center rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-teal-400 transition"
         >
