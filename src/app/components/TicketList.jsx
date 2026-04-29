@@ -105,7 +105,12 @@ export default function TicketList({
       ) : (
         <div>
           {tickets.map((ticket) => (
-            <div key={ticket.id} className="mt-6">
+            <div
+              key={ticket.id}
+              data-cy="ticket-card"
+              data-ticket-id={ticket.id}
+              className="mt-6"
+            >
               <div className="p-5 bg-gray-800/40 border border-gray-700 rounded-xl hover:bg-gray-800/60 transition-colors">
 
                 {/* TÍTULO + STATUS */}
@@ -115,13 +120,14 @@ export default function TicketList({
                     href={`/ticket/${ticket.id}`}
                     className="hover:underline"
                   >
-                    <h3 className="text-lg font-medium text-white">
+                    <h3 data-cy="ticket-title" className="text-lg font-medium text-white">
                       {ticket.title}
                     </h3>
                   </Link>
 
                   {/* BADGE MINIMALISTA */}
                   <span
+                    data-cy="ticket-status-badge"
                     className={`
                       px-3 py-1 text-xs rounded-full font-medium
                       ${ticket.status === "OPEN"
