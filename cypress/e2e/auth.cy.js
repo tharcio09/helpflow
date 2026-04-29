@@ -4,7 +4,7 @@ describe("Autenticação", () => {
 
         cy.visit("/register");
 
-        cy.get("[data-cy='register-name']").type("Tharcio teste");
+        cy.get("[data-cy='register-name']").type("Usuário Teste");
         cy.get("[data-cy='register-email']").type(email);
         cy.get("[data-cy='register-password']").type("123456");
         cy.get("[data-cy='register-confirm-password']").type("123456");
@@ -12,5 +12,37 @@ describe("Autenticação", () => {
 
         cy.url().should("include", "/dashboard");
         cy.contains("Olá").should("be.visible");
+    });
+
+    it("deve fazer login com credenciais válidas", () => {
+        cy.createTestUser().then((user) => {
+            cy.visit("/login");
+
+            cy.get("[data-cy='login-email']").type(user.email);
+            cy.get("[data-cy='login-password']").type(user.password);
+            cy.get("[data-cy='login-submit']").click();
+
+            cy.url().should("include", "/dashboard");
+            cy.contains("Organize e acompanhe").should("be.visible");
+        });
+    });
+
+    it("deve mostrar erro com senha inválida", () => {
+        cy.createTestUser().then((user) => {
+            cy.visit("/login");
+
+            cy.get("[data-cy='login-email']").type(user.email);
+            cy.get("[data-cy='login-password']").type("senha-errada");
+            cy.get("[data-cy='login-submit']").click();
+
+            cy.url().should("include", "/login");
+            cy.contains("Email ou senha inválidos").should("be.visible");
+        });
+    });
+
+    it("deve proteger o dashboard de usuários não autenticados", () => {
+        cy.visit("/dashboard");
+
+        cy.url().should("not.include", "/dashboard");
     });
 });
