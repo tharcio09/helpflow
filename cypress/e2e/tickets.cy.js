@@ -20,6 +20,17 @@ describe("Tickets", () => {
         });
     });
 
+    describe("Listagem", () => {
+        it("deve exibir a estrutura principal do dashboard", () => {
+            cy.visit("/dashboard");
+
+            cy.contains("HelpFlow").should("be.visible");
+            cy.contains("Dashboard").should("be.visible");
+            cy.contains("Novo Ticket").should("be.visible");
+            cy.contains("Meus tickets").should("be.visible");
+        });
+    });
+
     describe("Atualização", () => {
         it("deve atualizar o status de um ticket específico", () => {
             const title = `Ticket ${Date.now()}`;
