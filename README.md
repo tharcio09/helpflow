@@ -6,7 +6,7 @@ Sistema de Service Desk e gestão de chamados corporativos desenvolvido com **Ne
 
 ## Status do Projeto
 
-**Em evolução contínua, com versão disponível em produção.**
+**Publicado com demonstração interativa e acesso rápido em 1 clique.**
 
 Todas as funcionalidades centrais de multi-tenancy, isolamento corporativo, cadastro com convite por código, autenticação, triagem ágil e privacidade de tickets estão plenamente implementadas e testadas.
 
@@ -35,7 +35,7 @@ O HelpFlow replica a dinâmica operacional de um departamento de TI ou suporte c
 
 ## Demonstração
 
-- **Aplicação em produção:** [https://helpflow.vercel.app/](https://helpflow.vercel.app/)
+- **Aplicação publicada:** [https://helpflow.vercel.app/](https://helpflow.vercel.app/)
 - **Repositório:** [https://github.com/tharciosantos/helpflow](https://github.com/tharciosantos/helpflow)
 
 A aplicação conta com **Acesso de Demonstração (1-Clique)** diretamente na tela de login, permitindo explorar as duas visões corporativas da empresa fictícia **HelpFlow Corporativo (Demo)** (`DEMO-2026`):
@@ -97,6 +97,8 @@ O sistema adota regras rigorosas de autorização no servidor (RBAC + Multi-tena
 |---|---|---|---|---|---|
 | **Criar chamado** | Sim | Sim | Sim | Sim | Sim (na sua empresa) |
 | **Visualizar chamado** | Sim | Bloqueado | Sim | Sim (todos da empresa) | Bloqueado |
+| **Comentar no chamado** | Sim | Bloqueado | Sim | Sim | Bloqueado |
+| **Excluir comentário** | Sim (próprio) | Bloqueado | Sim (próprio) | Sim (qualquer da empresa) | Bloqueado |
 | **Editar título/descrição** | Sim | Bloqueado | Sim | Sim | Bloqueado |
 | **Alterar status/prioridade** | Bloqueado | Bloqueado | Bloqueado | Sim | Bloqueado |
 | **Atribuir responsável** | Bloqueado | Bloqueado | Bloqueado | Sim | Bloqueado |
@@ -116,14 +118,15 @@ O sistema adota regras rigorosas de autorização no servidor (RBAC + Multi-tena
 - Cadastro segmentado em abas (Cadastrar Empresa vs Sou Funcionário).
 - Criptografia de senhas com hash `bcryptjs` (salt rounds = 10).
 - Sessões protegidas com NextAuth.js (JWT) propagando `companyId`, `companyName` e `companyCode`.
-- Rate limiting em memória com expiração automática nas rotas de login, cadastro e tickets.
+- Rate limiting em memória com expiração automática nas rotas de login, cadastro, comentários e tickets.
 - Validação estrita de schemas com Zod no servidor.
 - Headers de segurança HTTP configurados (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`).
 
-### Gestão e Triagem de Chamados
+### Gestão, Triagem e Interações de Chamados
 - Abertura de chamados com título, descrição detalhada e seleção de prioridade.
 - Estados de chamado: Aberto (`OPEN`), Em Progresso (`IN_PROGRESS`) e Fechado (`CLOSED`).
 - Níveis de prioridade: Baixa (`LOW`), Média (`MEDIUM`), Alta (`HIGH`) e Urgente (`URGENT`).
+- **Sistema de Mensagens e Comentários Internos:** Linha do tempo de interações entre solicitante e suporte diretamente na página de detalhes com identificação visual de papel (`TI / Suporte` vs `Funcionário`).
 - Painel de triagem ágil na página de detalhes e no dashboard (alteração rápida de status, prioridade e responsável).
 - Atribuição flexível de responsáveis entre todos os membros e técnicos da empresa.
 - Indicadores numéricos (KPIs) calculados dinamicamente com base no escopo visível ao usuário.
@@ -186,73 +189,3 @@ src/
 prisma/
 ├── schema.prisma            # Modelos relacionais (Company, User, Ticket, Account, etc.)
 └── migrations/              # Histórico de migrações PostgreSQL
-```
-
----
-
-## Como Executar Localmente
-
-### 1. Clonar o repositório
-```bash
-git clone https://github.com/tharciosantos/helpflow.git
-cd helpflow
-```
-
-### 2. Instalar dependências
-```bash
-npm install
-```
-
-### 3. Configurar variáveis de ambiente
-Crie um arquivo `.env` a partir do modelo `.env.example`:
-```bash
-cp .env.example .env
-```
-
-Preencha as variáveis de banco de dados e autenticação:
-```env
-DATABASE_URL="postgresql://user:password@host:5432/helpflow?schema=public"
-DIRECT_URL="postgresql://user:password@host:5432/helpflow?schema=public"
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="sua-chave-secreta-de-desenvolvimento"
-```
-
-### 4. Sincronizar o banco de dados
-```bash
-npx prisma db push
-npx prisma generate
-```
-
-### 5. Iniciar o servidor local
-```bash
-npm run dev
-```
-Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
-
----
-
-## Testes e Validação
-
-```bash
-# Executar testes unitários com Vitest
-npm test
-
-# Executar testes em modo watch
-npm run test:watch
-
-# Executar linter ESLint
-npm run lint
-
-# Executar testes E2E com Cypress
-npm run cypress:run
-```
-
----
-
-## Autor
-
-**Tharcio Santos**  
-- **GitHub:** [https://github.com/tharciosantos](https://github.com/tharciosantos)  
-- **LinkedIn:** [https://www.linkedin.com/in/tharcio-santos-dev/](https://www.linkedin.com/in/tharcio-santos-dev/)  
-- **Portfólio:** [https://tharcio-portfolio.vercel.app/](https://tharcio-portfolio.vercel.app/)
-
