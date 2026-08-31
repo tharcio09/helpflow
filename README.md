@@ -106,6 +106,30 @@ O sistema adota regras rigorosas de autorização no servidor (RBAC + Multi-tena
 
 ---
 
+## Endpoints da API REST
+
+A API do HelpFlow segue os padrões REST com validação de payload via Zod, rate limiting em memória e verificação estrita de sessão:
+
+| Método | Rota | Descrição | Acesso |
+|---|---|---|---|
+| `POST` | `/api/register/company` | Cadastro de nova empresa e criação da conta de gestão (AGENT) | Público |
+| `POST` | `/api/register/employee` | Cadastro de colaborador vinculado via código de convite da empresa | Público |
+| `POST` | `/api/auth/[...nextauth]` | Autenticação por credenciais e sessões JWT com NextAuth | Público |
+| `POST` | `/api/auth/forgot-password` | Solicitação de redefinição de senha por e-mail | Público |
+| `POST` | `/api/auth/reset-password` | Validação de token de segurança e definição de nova senha | Público |
+| `GET` | `/api/tickets` | Listagem paginada de chamados filtrados por empresa e escopo de permissão | Autenticado |
+| `POST` | `/api/tickets` | Abertura de novo chamado com título, descrição e prioridade | Autenticado |
+| `GET` | `/api/tickets/[id]` | Consulta detalhada do chamado com timeline de mensagens e autorizações | Autenticado (RBAC) |
+| `PATCH` | `/api/tickets/[id]` | Atualização de status, prioridade, responsável ou conteúdo do chamado | Autenticado (RBAC) |
+| `DELETE` | `/api/tickets/[id]` | Exclusão controlada de chamado | Autor / Suporte |
+| `GET` | `/api/tickets/[id]/comments` | Listagem de comentários e histórico de interações do chamado | Autenticado (RBAC) |
+| `POST` | `/api/tickets/[id]/comments` | Envio de nova mensagem no chamado com sanitização de texto | Autenticado (RBAC) |
+| `DELETE` | `/api/tickets/[id]/comments/[commentId]` | Remoção de comentário | Autor / AGENT |
+| `GET` | `/api/agents` | Listagem de membros da organização para delegação de atendimento | Empresa / TI (AGENT) |
+| `GET` | `/api/health` | Verificação de integridade da API e conectividade com PostgreSQL | Público |
+
+---
+
 ## Funcionalidades Implementadas
 
 ### Multi-tenancy e Organizações
@@ -144,6 +168,61 @@ O sistema adota regras rigorosas de autorização no servidor (RBAC + Multi-tena
 
 ---
 
+## Modelagem do Banco de Dados (Prisma Schema)
+
+O banco de dados relacional (PostgreSQL) é estruturado em torno do isolamento por organização:
+
+```prisma
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  tickets   Ticket[]
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String    @unique
+  role          Role      @default(CLIENT)
+  companyId     String?
+  company       Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdTickets  Ticket[] @relation("TicketAuthor")
+  assignedTickets Ticket[] @relation("TicketAgent")
+  comments        TicketComment[]
+}
+
+model Ticket {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  status      Status   @default(OPEN)
+  priority    Priority @default(MEDIUM)
+  companyId   String?
+  company       Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation("TicketAuthor", fields: [authorId], references: [id])
+  agentId     String?
+  agent       User?    @relation("TicketAgent", fields: [agentId], references: [id])
+  comments    TicketComment[]
+}
+
+model TicketComment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+```
+
+---
+
 ## Stack Tecnológica
 
 ### Front-end
@@ -164,8 +243,8 @@ O sistema adota regras rigorosas de autorização no servidor (RBAC + Multi-tena
 - **ORM:** Prisma ORM 6
 
 ### Qualidade & Testes
-- **Testes Unitários:** Vitest
-- **Testes E2E:** Cypress 15
+- **Testes Unitários:** Vitest (82 testes cobrindo schemas, autorização RBAC, utilitários e rate limiter)
+- **Testes E2E:** Cypress 15 (fluxos de login, permissões e tickets)
 - **Linter:** ESLint 9
 
 ---
@@ -180,12 +259,81 @@ src/
 │   ├── api/                 # Endpoints REST (auth, register, tickets, agents, health, cron)
 │   └── components/          # Componentes de interface (TicketList, EditTicketForm, ThemeToggle, etc.)
 ├── lib/
-│   ├── __tests__/           # Suíte de testes unitários do Vitest
+│   ├── __tests__/           # Suíte de 82 testes unitários do Vitest
 │   ├── auth.js              # Configuração do NextAuth e callbacks de sessão
 │   ├── prisma.js            # Instância singleton do PrismaClient
 │   ├── rateLimiter.js       # Middleware de taxa limite
-│   ├── schemas.js           # Schemas Zod de validação (auth, empresa, funcionário, tickets)
+│   ├── schemas.js           # Schemas Zod de validação (auth, empresa, funcionário, tickets, comentários)
 │   └── ticketAuthorization.js # Regras de autorização e isolamento multi-empresa
 prisma/
-├── schema.prisma            # Modelos relacionais (Company, User, Ticket, Account, etc.)
+├── schema.prisma            # Modelos relacionais (Company, User, Ticket, Account, TicketComment, etc.)
 └── migrations/              # Histórico de migrações PostgreSQL
+```
+
+---
+
+## Como Executar Localmente
+
+### 1. Clonar o repositório
+```bash
+git clone https://github.com/tharciosantos/helpflow.git
+cd helpflow
+```
+
+### 2. Instalar dependências
+```bash
+npm install
+```
+
+### 3. Configurar variáveis de ambiente
+Crie um arquivo `.env` a partir do modelo `.env.example`:
+```bash
+cp .env.example .env
+```
+
+Preencha as variáveis de banco de dados e autenticação:
+```env
+DATABASE_URL="postgresql://user:password@host:5432/helpflow?schema=public"
+DIRECT_URL="postgresql://user:password@host:5432/helpflow?schema=public"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="sua-chave-secreta-de-desenvolvimento"
+```
+
+### 4. Sincronizar o banco de dados
+```bash
+npx prisma db push
+npx prisma generate
+```
+
+### 5. Iniciar o servidor local
+```bash
+npm run dev
+```
+Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
+
+---
+
+## Testes e Validação
+
+```bash
+# Executar 82 testes unitários com Vitest
+npm test
+
+# Executar testes em modo watch
+npm run test:watch
+
+# Executar linter ESLint
+npm run lint
+
+# Executar testes E2E com Cypress
+npm run cypress:run
+```
+
+---
+
+## Autor
+
+**Tharcio Santos**  
+- **GitHub:** [https://github.com/tharciosantos](https://github.com/tharciosantos)  
+- **LinkedIn:** [https://www.linkedin.com/in/tharcio-santos-dev/](https://www.linkedin.com/in/tharcio-santos-dev/)  
+- **Portfólio:** [https://tharcio-portfolio.vercel.app/](https://tharcio-portfolio.vercel.app/)
