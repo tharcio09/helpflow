@@ -1,0 +1,136 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+import { createCommentSchema } from '@/lib/schemas';
+import { checkRateLimit } from '@/lib/rateLimiter';
+import { canCommentOnTicket, canViewTicket } from '@/lib/ticketAuthorization';
+
+// GET /api/tickets/[id]/comments - Lista os comentários do chamado
+export async function GET(req, { params }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ message: 'Não autorizado' }, { status: 401 });
+  }
+
+  try {
+    const { id } = await params;
+
+    const ticket = await prisma.ticket.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        authorId: true,
+        agentId: true,
+        companyId: true,
+      },
+    });
+
+    if (!ticket) {
+      return NextResponse.json({ message: 'Ticket não encontrado' }, { status: 404 });
+    }
+
+    if (!canViewTicket(session.user, ticket)) {
+      return NextResponse.json({ message: 'Acesso negado' }, { status: 403 });
+    }
+
+    const comments = await prisma.ticketComment.findMany({
+      where: { ticketId: id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return NextResponse.json(comments, { status: 200 });
+  } catch (error) {
+    console.error('Erro ao listar comentários:', error);
+    return NextResponse.json({ message: 'Erro interno do servidor' }, { status: 500 });
+  }
+}
+
+// POST /api/tickets/[id]/comments - Adiciona novo comentário ao chamado
+export async function POST(req, { params }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ message: 'Não autorizado' }, { status: 401 });
+  }
+
+  const { isLimited } = checkRateLimit(`comment:create:${session.user.id}`, { maxRequests: 20 });
+  if (isLimited) {
+    return NextResponse.json({ message: 'Muitas mensagens enviadas. Aguarde um instante.' }, { status: 429 });
+  }
+
+  try {
+    const { id } = await params;
+
+    const ticket = await prisma.ticket.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        authorId: true,
+        agentId: true,
+        companyId: true,
+        status: true,
+      },
+    });
+
+    if (!ticket) {
+      return NextResponse.json({ message: 'Ticket não encontrado' }, { status: 404 });
+    }
+
+    if (!canCommentOnTicket(session.user, ticket)) {
+      return NextResponse.json({ message: 'Você não tem permissão para comentar neste chamado.' }, { status: 403 });
+    }
+
+    const body = await req.json();
+    const parsed = createCommentSchema.safeParse(body);
+
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Dados inválidos.';
+      return NextResponse.json({ message: errorMsg }, { status: 400 });
+    }
+
+    const newComment = await prisma.$transaction(async (tx) => {
+      const created = await tx.ticketComment.create({
+        data: {
+          content: parsed.data.content,
+          ticketId: id,
+          authorId: session.user.id,
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+              role: true,
+            },
+          },
+        },
+      });
+
+      // Mantém o ticket no topo das listas ordenadas por atualização
+      await tx.ticket.update({
+        where: { id },
+        data: { updatedAt: new Date() },
+      });
+
+      return created;
+    });
+
+    return NextResponse.json(newComment, { status: 201 });
+  } catch (error) {
+    console.error('Erro ao criar comentário:', error);
+    return NextResponse.json({ message: 'Erro interno do servidor' }, { status: 500 });
+  }
+}

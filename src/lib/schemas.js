@@ -110,3 +110,13 @@ export const resetPasswordSchema = z.object({
     message: 'As senhas não coincidem.',
     path: ['confirmPassword'],
 });
+
+// Schema para comentários em chamados
+export const createCommentSchema = z.object({
+    content: z
+        .string({ required_error: 'O comentário é obrigatório.' })
+        .trim()
+        .min(1, 'O comentário não pode ficar vazio.')
+        .max(2000, 'O comentário não pode ter mais de 2000 caracteres.'),
+});
+

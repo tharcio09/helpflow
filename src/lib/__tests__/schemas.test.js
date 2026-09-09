@@ -7,6 +7,7 @@ import {
     registerCompanySchema,
     registerEmployeeSchema,
     generateCompanyCode,
+    createCommentSchema,
 } from '../schemas.js';
 
 // ─────────────────────────────────────────────
@@ -272,3 +273,33 @@ describe('registerCompanySchema & registerEmployeeSchema', () => {
         expect(code).toMatch(/^TECH-\d{4}$/);
     });
 });
+
+// ─────────────────────────────────────────────
+// createCommentSchema
+// ─────────────────────────────────────────────
+describe('createCommentSchema', () => {
+    it('deve aceitar comentário válido', () => {
+        const result = createCommentSchema.safeParse({
+            content: 'Já reiniciei a máquina e o erro persiste.',
+        });
+        expect(result.success).toBe(true);
+        expect(result.data.content).toBe('Já reiniciei a máquina e o erro persiste.');
+    });
+
+    it('deve rejeitar comentário vazio ou apenas com espaços', () => {
+        const result = createCommentSchema.safeParse({
+            content: '   ',
+        });
+        expect(result.success).toBe(false);
+        expect(result.error.flatten().fieldErrors.content).toBeDefined();
+    });
+
+    it('deve rejeitar comentário com mais de 2000 caracteres', () => {
+        const result = createCommentSchema.safeParse({
+            content: 'A'.repeat(2001),
+        });
+        expect(result.success).toBe(false);
+        expect(result.error.flatten().fieldErrors.content).toBeDefined();
+    });
+});
+
