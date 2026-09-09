@@ -4,6 +4,8 @@ import {
   canEditTicketContent,
   canViewTicket,
   getForbiddenTicketFields,
+  canCommentOnTicket,
+  canDeleteComment,
 } from '../ticketAuthorization';
 
 const owner = { id: 'client-1', role: 'CLIENT', companyId: 'company-A' };
@@ -65,5 +67,34 @@ describe('autorização de tickets com isolamento multi-empresa', () => {
       agentId: 'agent-1',
     })).toEqual([]);
   });
+
+  describe('autorização de comentários', () => {
+    const ownComment = { id: 'comm-1', authorId: owner.id, ticketId: ticket.id };
+    const agentComment = { id: 'comm-2', authorId: agentSameCompany.id, ticketId: ticket.id };
+
+    it('permite ao autor do chamado e ao AGENT comentar no chamado', () => {
+      expect(canCommentOnTicket(owner, ticket)).toBe(true);
+      expect(canCommentOnTicket(agentSameCompany, ticket)).toBe(true);
+    });
+
+    it('bloqueia outro colaborador da mesma empresa ou de outra de comentar no chamado', () => {
+      expect(canCommentOnTicket(otherClientSameCompany, ticket)).toBe(false);
+      expect(canCommentOnTicket(otherCompanyClient, ticket)).toBe(false);
+    });
+
+    it('permite ao autor excluir seu próprio comentário', () => {
+      expect(canDeleteComment(owner, ownComment, ticket)).toBe(true);
+    });
+
+    it('permite ao AGENT moderar e excluir qualquer comentário da sua empresa', () => {
+      expect(canDeleteComment(agentSameCompany, ownComment, ticket)).toBe(true);
+    });
+
+    it('bloqueia colaborador de excluir comentários de outros usuários', () => {
+      expect(canDeleteComment(owner, agentComment, ticket)).toBe(false);
+      expect(canDeleteComment(otherClientSameCompany, ownComment, ticket)).toBe(false);
+    });
+  });
 });
+
 

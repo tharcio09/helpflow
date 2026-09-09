@@ -27,3 +27,16 @@ export function getForbiddenTicketFields(user, body = {}) {
 export function canEditTicketContent(user, ticket) {
   return canViewTicket(user, ticket);
 }
+
+export function canCommentOnTicket(user, ticket) {
+  return canViewTicket(user, ticket);
+}
+
+export function canDeleteComment(user, comment, ticket) {
+  if (!user?.id || !comment || !ticket) return false;
+  if (!canViewTicket(user, ticket)) return false;
+  if (comment.authorId === user.id) return true;
+  if (user.role === 'AGENT') return true;
+  return false;
+}
+

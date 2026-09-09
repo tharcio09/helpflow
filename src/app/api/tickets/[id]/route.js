@@ -24,8 +24,14 @@ export async function GET(req, { params }) {
     const ticket = await prisma.ticket.findUnique({
       where: { id },
       include: {
-        author: { select: { id: true, name: true, email: true, image: true } },
-        agent: { select: { id: true, name: true, email: true, image: true } },
+        author: { select: { id: true, name: true, email: true, image: true, role: true } },
+        agent: { select: { id: true, name: true, email: true, image: true, role: true } },
+        comments: {
+          include: {
+            author: { select: { id: true, name: true, email: true, image: true, role: true } },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
       },
     });
 

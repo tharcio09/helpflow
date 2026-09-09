@@ -1,0 +1,218 @@
+import { LuMessageSquare, LuSend, LuTrash2 } from 'react-icons/lu';
+import { canDeleteComment } from '@/lib/ticketAuthorization';
+
+export default function CommentsSection({
+    ticket,
+    comments,
+    session,
+    theme,
+    commentText,
+    setCommentText,
+    isSubmittingComment,
+    commentError,
+    deletingCommentId,
+    onAddComment,
+    onDeleteComment,
+}) {
+    return (
+        <div className={`rounded-2xl border shadow-sm p-6 sm:p-8 space-y-6 ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800'
+        }`}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200/60 dark:border-slate-800/80">
+                <div className="flex items-center gap-2.5">
+                    <div className={`p-2 rounded-lg ${
+                        theme === 'light' ? 'bg-emerald-50 text-emerald-600' : 'bg-emerald-950/50 text-emerald-400'
+                    }`}>
+                        <LuMessageSquare size={18} />
+                    </div>
+                    <div>
+                        <h2 className={`text-base sm:text-lg font-bold tracking-tight ${
+                            theme === 'light' ? 'text-slate-900' : 'text-white'
+                        }`}>
+                            Mensagens e Histórico de Atendimento
+                        </h2>
+                        <p className={`text-xs ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                            Espaço para esclarecimentos, instruções e acompanhamento da resolução.
+                        </p>
+                    </div>
+                </div>
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                    theme === 'light'
+                        ? 'bg-slate-100 text-slate-700 border-slate-200'
+                        : 'bg-slate-800 text-slate-300 border-slate-700'
+                }`}>
+                    {comments.length} {comments.length === 1 ? 'mensagem' : 'mensagens'}
+                </span>
+            </div>
+
+            <div className="space-y-4">
+                {comments.length === 0 ? (
+                    <div className={`text-center py-8 px-4 rounded-xl border border-dashed ${
+                        theme === 'light'
+                            ? 'bg-slate-50/60 border-slate-300 text-slate-500'
+                            : 'bg-slate-950/30 border-slate-800 text-slate-400'
+                    }`}>
+                        <LuMessageSquare size={28} className="mx-auto mb-2 opacity-40" />
+                        <p className="text-sm font-medium">Nenhuma mensagem registrada ainda.</p>
+                        <p className="text-xs mt-1 opacity-75">Envie uma mensagem abaixo para registrar o andamento ou tirar dúvidas sobre o chamado.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-3.5">
+                        {comments.map((comment) => {
+                            const isAgent = comment.author?.role === 'AGENT';
+                            const isTicketCreator = comment.authorId === ticket.authorId;
+                            // Mesma regra do backend (inclui checagem de companyId),
+                            // evita exibir a lixeira para AGENT de outra empresa.
+                            const canDeleteThisComment = canDeleteComment(session?.user, comment, ticket);
+
+                            return (
+                                <div
+                                    key={comment.id}
+                                    data-cy="ticket-comment-item"
+                                    className={`rounded-xl p-4 border transition-all ${
+                                        isAgent
+                                            ? theme === 'light'
+                                                ? 'bg-emerald-50/40 border-emerald-200/80 shadow-xs'
+                                                : 'bg-emerald-950/20 border-emerald-800/40 shadow-xs'
+                                            : theme === 'light'
+                                                ? 'bg-slate-50 border-slate-200'
+                                                : 'bg-slate-950/40 border-slate-800'
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between gap-3 mb-2">
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs shrink-0 border ${
+                                                isAgent
+                                                    ? 'bg-emerald-600 text-white border-emerald-500'
+                                                    : theme === 'light'
+                                                        ? 'bg-slate-200 text-slate-700 border-slate-300'
+                                                        : 'bg-slate-800 text-slate-200 border-slate-700'
+                                            }`}>
+                                                {comment.author?.name ? comment.author.name.slice(0, 2).toUpperCase() : 'HF'}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="flex flex-wrap items-center gap-1.5">
+                                                    <span className={`text-xs sm:text-sm font-semibold truncate ${
+                                                        theme === 'light' ? 'text-slate-900' : 'text-white'
+                                                    }`}>
+                                                        {comment.author?.name || 'Membro da Equipe'}
+                                                    </span>
+                                                    {isAgent ? (
+                                                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border ${
+                                                            theme === 'light'
+                                                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                                                : 'bg-emerald-900/60 text-emerald-300 border-emerald-700'
+                                                        }`}>
+                                                            TI / Suporte
+                                                        </span>
+                                                    ) : (
+                                                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border ${
+                                                            theme === 'light'
+                                                                ? 'bg-blue-100 text-blue-800 border-blue-200'
+                                                                : 'bg-blue-950/60 text-blue-300 border-blue-800'
+                                                        }`}>
+                                                            Funcionário
+                                                        </span>
+                                                    )}
+                                                    {isTicketCreator && !isAgent && (
+                                                        <span className="text-[10px] text-slate-500 font-medium">
+                                                            (Autor)
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <span className={`text-[11px] ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                                                    {new Date(comment.createdAt).toLocaleDateString('pt-BR', {
+                                                        day: '2-digit',
+                                                        month: '2-digit',
+                                                        year: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {canDeleteThisComment && (
+                                            <button
+                                                onClick={() => onDeleteComment(comment.id)}
+                                                disabled={deletingCommentId === comment.id}
+                                                title="Excluir mensagem"
+                                                data-cy="ticket-comment-delete"
+                                                className={`p-1.5 rounded-lg text-slate-400 hover:text-red-500 transition-colors ${
+                                                    theme === 'light' ? 'hover:bg-red-50' : 'hover:bg-red-950/40'
+                                                }`}
+                                            >
+                                                <LuTrash2 size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <p className={`text-sm whitespace-pre-wrap leading-relaxed pl-10 ${
+                                        theme === 'light' ? 'text-slate-800' : 'text-slate-200'
+                                    }`}>
+                                        {comment.content}
+                                    </p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            <form onSubmit={onAddComment} className="pt-2">
+                <div className={`p-4 rounded-xl border focus-within:ring-2 focus-within:ring-emerald-400/20 ${
+                    theme === 'light'
+                        ? 'bg-slate-50 border-slate-200 focus-within:border-emerald-500'
+                        : 'bg-slate-950/50 border-slate-800 focus-within:border-emerald-400'
+                }`}>
+                    <label htmlFor="comment-input" className="sr-only">
+                        Escreva uma mensagem ou atualização sobre o chamado
+                    </label>
+                    <textarea
+                        id="comment-input"
+                        data-cy="ticket-comment-input"
+                        rows={3}
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        onKeyDown={(e) => {
+                            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                                e.preventDefault();
+                                onAddComment();
+                            }
+                        }}
+                        placeholder="Escreva uma mensagem, esclarecimento ou atualização sobre o chamado... (Pressione Ctrl+Enter para enviar)"
+                        maxLength={2000}
+                        disabled={isSubmittingComment}
+                        className={`w-full bg-transparent border-0 resize-y text-sm focus:outline-none ${
+                            theme === 'light' ? 'text-slate-900 placeholder-slate-400' : 'text-white placeholder-slate-500'
+                        }`}
+                    />
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200/50 dark:border-slate-800/60 mt-2">
+                        <span className={`text-[11px] ${
+                            commentText.length > 1800 ? 'text-amber-500' : 'text-slate-400'
+                        }`}>
+                            {commentText.length} / 2000 caracteres
+                        </span>
+
+                        <button
+                            type="submit"
+                            data-cy="ticket-comment-submit"
+                            disabled={isSubmittingComment || !commentText.trim()}
+                            className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm inline-flex items-center gap-2"
+                        >
+                            <LuSend size={14} />
+                            {isSubmittingComment ? 'Enviando...' : 'Enviar Mensagem'}
+                        </button>
+                    </div>
+                </div>
+
+                {commentError && (
+                    <p role="alert" className={`text-xs mt-2 ${theme === 'light' ? 'text-red-600' : 'text-red-400'}`}>
+                        {commentError}
+                    </p>
+                )}
+            </form>
+        </div>
+    );
+}

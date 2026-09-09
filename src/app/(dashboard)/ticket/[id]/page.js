@@ -4,16 +4,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { 
-    LuArrowLeft, 
-    LuUser, 
-    LuCalendar, 
-    LuShield, 
-    LuClock, 
-    LuPencil, 
-    LuTrash2 
+import {
+    LuArrowLeft,
+    LuUser,
+    LuCalendar,
+    LuShield,
+    LuClock,
+    LuPencil,
+    LuTrash2
 } from 'react-icons/lu';
 import { getStatusDisplayNamePT, getStatusBadgeClasses, getPriorityBadge } from '@/lib/ticketUtils';
+import CommentsSection from '../../../components/CommentsSection';
 import { useTheme } from '../../../components/ThemeProvider';
 
 export default function TicketDetailsPage() {
@@ -33,6 +34,13 @@ export default function TicketDetailsPage() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [success, setSuccess] = useState('');
 
+    // Estados de Comentários / Interações
+    const [comments, setComments] = useState([]);
+    const [commentText, setCommentText] = useState('');
+    const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+    const [commentError, setCommentError] = useState('');
+    const [deletingCommentId, setDeletingCommentId] = useState(null);
+
     const fetchTicket = useCallback(async () => {
         setLoading(true);
         setError('');
@@ -46,6 +54,7 @@ export default function TicketDetailsPage() {
             }
             const data = await res.json();
             setTicket(data);
+            setComments(data.comments || []);
             setNewStatus(data.status ?? 'OPEN');
             setNewPriority(data.priority ?? 'MEDIUM');
             setNewAgentId(data.agentId ?? '');
@@ -96,55 +105,109 @@ export default function TicketDetailsPage() {
                 throw new Error(body.message || 'Falha ao atualizar o ticket.');
             }
             const updated = await res.json();
-            setTicket(updated);
+            setTicket(prev => ({ ...prev, ...updated }));
             setNewStatus(updated.status);
             setNewPriority(updated.priority);
             setNewAgentId(updated.agentId || '');
-            setSuccess('Chamado atualizado com sucesso.');
+            setSuccess('Alterações salvas com sucesso!');
+            setTimeout(() => setSuccess(''), 4000);
         } catch (err) {
             console.error('Erro ao atualizar ticket:', err);
-            setError(err.message || 'Erro ao atualizar chamado.');
+            setError(err.message || 'Erro ao atualizar o ticket.');
         } finally {
             setIsUpdating(false);
         }
     };
 
     const handleDeleteTicket = async () => {
-        if (!confirm('Tem certeza que deseja deletar este ticket? Esta ação não pode ser desfeita.')) return;
+        if (!window.confirm('Tem certeza de que deseja deletar este ticket? Esta ação não pode ser desfeita.')) {
+            return;
+        }
+
         setIsDeleting(true);
         setError('');
+        setSuccess('');
+
         try {
-            const res = await fetch(`/api/tickets/${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/tickets/${id}`, {
+                method: 'DELETE',
+            });
+
             if (!res.ok) {
-                if (res.status === 404) throw new Error('Ticket não encontrado para exclusão.');
-                if (res.status === 403 || res.status === 401) throw new Error('Não autorizado para deletar.');
-                throw new Error('Falha ao deletar o ticket.');
+                const body = await res.json();
+                throw new Error(body.message || 'Falha ao deletar o ticket');
             }
+
             router.push('/dashboard');
             router.refresh();
         } catch (err) {
             console.error('Erro ao deletar ticket:', err);
-            setError(err.message || 'Erro ao deletar o ticket.');
-        } finally {
+            setError(err.message || 'Erro ao deletar o ticket');
             setIsDeleting(false);
         }
     };
 
-    if (loading || sessionStatus === 'loading') {
+    // Adicionar Comentário
+    const handleAddComment = async (e) => {
+        if (e) e.preventDefault();
+        const trimmed = commentText.trim();
+        if (!trimmed) return;
+
+        setIsSubmittingComment(true);
+        setCommentError('');
+
+        try {
+            const res = await fetch(`/api/tickets/${id}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: trimmed }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message || 'Falha ao enviar mensagem.');
+            }
+
+            const newComment = await res.json();
+            setComments(prev => [...prev, newComment]);
+            setCommentText('');
+        } catch (err) {
+            console.error('Erro ao postar comentário:', err);
+            setCommentError(err.message || 'Erro ao enviar comentário.');
+        } finally {
+            setIsSubmittingComment(false);
+        }
+    };
+
+    // Excluir Comentário
+    const handleDeleteComment = async (commentId) => {
+        if (!window.confirm('Deseja realmente excluir este comentário?')) return;
+
+        setDeletingCommentId(commentId);
+        try {
+            const res = await fetch(`/api/tickets/${id}/comments/${commentId}`, {
+                method: 'DELETE',
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message || 'Falha ao excluir comentário.');
+            }
+
+            setComments(prev => prev.filter(c => c.id !== commentId));
+        } catch (err) {
+            console.error('Erro ao excluir comentário:', err);
+            alert(err.message || 'Erro ao excluir comentário.');
+        } finally {
+            setDeletingCommentId(null);
+        }
+    };
+
+    if (sessionStatus === 'loading' || (loading && !ticket)) {
         return (
-            <main aria-label="Carregando detalhes do ticket" aria-busy="true" className={`max-w-4xl mx-auto space-y-6 ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
-                <div className={`animate-pulse rounded-2xl p-8 border ${
-                    theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-                }`}>
-                    <div className={`h-7 w-2/3 rounded-lg ${theme === 'light' ? 'bg-slate-200' : 'bg-slate-800'}`} />
-                    <div className={`mt-6 h-20 w-full rounded-xl ${theme === 'light' ? 'bg-slate-100' : 'bg-slate-800/60'}`} />
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-                        {[1, 2, 3, 4].map(i => (
-                            <div key={i} className={`h-16 rounded-xl ${theme === 'light' ? 'bg-slate-100' : 'bg-slate-800/40'}`} />
-                        ))}
-                    </div>
-                </div>
-            </main>
+            <div className="flex h-64 items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+            </div>
         );
     }
 
@@ -155,6 +218,8 @@ export default function TicketDetailsPage() {
     if (!ticket) {
         return <div className={`p-8 text-center ${theme === 'light' ? 'text-slate-500' : 'text-gray-400'}`}>Ticket não encontrado.</div>;
     }
+
+    const canManageTicket = session?.user?.role === 'AGENT' || session?.user?.id === ticket.authorId;
 
     return (
         <main className={`max-w-4xl mx-auto space-y-6 ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
@@ -171,6 +236,7 @@ export default function TicketDetailsPage() {
                 </Link>
             </div>
 
+            {/* Card Principal de Informações do Ticket */}
             <div className={`rounded-2xl border shadow-sm p-6 sm:p-8 space-y-6 ${
                 theme === 'light'
                     ? 'bg-white border-slate-200'
@@ -248,9 +314,9 @@ export default function TicketDetailsPage() {
                             <LuCalendar size={16} />
                         </div>
                         <div className="min-w-0">
-                            <span className="block text-[11px] font-medium text-slate-400">Criado em</span>
-                            <span className="block text-xs font-semibold truncate">
-                                {new Date(ticket.createdAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                            <span className="block text-[11px] font-medium text-slate-400">Data de Abertura</span>
+                            <span className="block text-xs font-semibold">
+                                {new Date(ticket.createdAt).toLocaleDateString('pt-BR')}
                             </span>
                         </div>
                     </div>
@@ -264,7 +330,7 @@ export default function TicketDetailsPage() {
                             <LuShield size={16} />
                         </div>
                         <div className="min-w-0">
-                            <span className="block text-[11px] font-medium text-slate-400">Responsável</span>
+                            <span className="block text-[11px] font-medium text-slate-400">Responsável Atual</span>
                             <span className="block text-xs font-semibold truncate" title={ticket.agent?.name || 'Não atribuído'}>
                                 {ticket.agent?.name || 'Não atribuído'}
                             </span>
@@ -275,37 +341,40 @@ export default function TicketDetailsPage() {
                         theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-800/40 border-slate-700/50'
                     }`}>
                         <div className={`p-2 rounded-lg ${
-                            theme === 'light' ? 'bg-amber-50 text-amber-600' : 'bg-amber-950/50 text-amber-400'
+                            theme === 'light' ? 'bg-emerald-50 text-emerald-600' : 'bg-emerald-950/50 text-emerald-400'
                         }`}>
                             <LuClock size={16} />
                         </div>
                         <div className="min-w-0">
-                            <span className="block text-[11px] font-medium text-slate-400">Atualizado em</span>
-                            <span className="block text-xs font-semibold truncate">
-                                {new Date(ticket.updatedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                            <span className="block text-[11px] font-medium text-slate-400">Última Atualização</span>
+                            <span className="block text-xs font-semibold">
+                                {new Date(ticket.updatedAt).toLocaleDateString('pt-BR')}
                             </span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {(session?.user?.role === 'AGENT' || session?.user?.id === ticket.authorId) && (
-                <div className={`p-6 sm:p-8 rounded-2xl border shadow-sm space-y-4 ${
+            {/* Painel de Gestão e Triagem Rápida */}
+            {canManageTicket && (
+                <div className={`rounded-2xl border shadow-sm p-6 space-y-4 ${
                     theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800'
                 }`}>
-                    <div>
-                        <h2 className="text-lg font-bold">Ações do Ticket</h2>
-                        <p className={`text-xs ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
-                            Gerencie o andamento e as opções deste chamado
-                        </p>
+                    <div className="flex items-center justify-between">
+                        <h2 className={`text-sm font-bold uppercase tracking-wider ${
+                            theme === 'light' ? 'text-slate-700' : 'text-slate-300'
+                        }`}>
+                            Ações Rápidas de Atendimento
+                        </h2>
                     </div>
 
                     {session?.user?.role === 'AGENT' && (
-                        <div className="space-y-4 pt-2">
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                {/* STATUS */}
-                                <div className="space-y-1.5">
-                                    <label htmlFor="ticket-status-select" className={`block text-xs font-semibold uppercase tracking-wider ${
+                        <div className={`p-4 rounded-xl border ${
+                            theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/40 border-slate-800'
+                        }`}>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label htmlFor="ticket-status-select" className={`block text-xs font-medium mb-1.5 ${
                                         theme === 'light' ? 'text-slate-600' : 'text-slate-300'
                                     }`}>
                                         Status
@@ -328,9 +397,8 @@ export default function TicketDetailsPage() {
                                     </select>
                                 </div>
 
-                                {/* PRIORIDADE */}
-                                <div className="space-y-1.5">
-                                    <label htmlFor="ticket-priority-select" className={`block text-xs font-semibold uppercase tracking-wider ${
+                                <div>
+                                    <label htmlFor="ticket-priority-select" className={`block text-xs font-medium mb-1.5 ${
                                         theme === 'light' ? 'text-slate-600' : 'text-slate-300'
                                     }`}>
                                         Prioridade
@@ -354,9 +422,8 @@ export default function TicketDetailsPage() {
                                     </select>
                                 </div>
 
-                                {/* RESPONSÁVEL */}
-                                <div className="space-y-1.5">
-                                    <label htmlFor="ticket-agent-select" className={`block text-xs font-semibold uppercase tracking-wider ${
+                                <div>
+                                    <label htmlFor="ticket-agent-select" className={`block text-xs font-medium mb-1.5 ${
                                         theme === 'light' ? 'text-slate-600' : 'text-slate-300'
                                     }`}>
                                         Responsável
@@ -432,6 +499,21 @@ export default function TicketDetailsPage() {
                     {success && <p role="status" className={`text-sm mt-2 ${theme === 'light' ? 'text-emerald-700' : 'text-emerald-300'}`}>{success}</p>}
                 </div>
             )}
+
+            {/* Seção de Comentários / Interações no Chamado */}
+            <CommentsSection
+                ticket={ticket}
+                comments={comments}
+                session={session}
+                theme={theme}
+                commentText={commentText}
+                setCommentText={setCommentText}
+                isSubmittingComment={isSubmittingComment}
+                commentError={commentError}
+                deletingCommentId={deletingCommentId}
+                onAddComment={handleAddComment}
+                onDeleteComment={handleDeleteComment}
+            />
         </main>
     );
 }
